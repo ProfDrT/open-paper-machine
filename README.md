@@ -297,11 +297,11 @@ The method-engine provides complete section templates for:
 If you use this tool in your research, please cite:
 
 ```bibtex
-@article{blask2025creator,
+@article{blask2026creator,
   title={From Creator to Orchestrator: How an {LLM} Agent Wrote This Paper
          and What That Means for Science},
-  author={Blask, Tobias-Benedikt},
-  year={2025},
+  author={Blask, Tobias-Benedikt and Funk, Burkhardt},
+  year={2026},
   note={Available at \url{https://github.com/ProfDrT/From_Creator_to_Orchestrator}}
 }
 ```
@@ -312,4 +312,4 @@ If you use this tool in your research, please cite:
 
 MIT License. See [LICENSE](LICENSE) for details.
 
-**Author:** Prof. Dr. Tobias Blask — [Harz University of Applied Sciences](https://www.hs-harz.de)
+**Authors:** Prof. Dr. Tobias Blask — [Harz University of Applied Sciences](https://www.hs-harz.de) · Prof. Dr. Burkhardt Funk — [Leuphana University of Lüneburg](https://www.leuphana.de)
