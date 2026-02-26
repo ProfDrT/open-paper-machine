@@ -2,3 +2,34 @@
 .DS_Store
 __pycache__/
 *.pyc
+
+# Generated outputs
+outputs/
+*.aux
+*.bbl
+*.blg
+*.log
+*.out
+
+# Working files
+.claude/
+draft.md
+framing.md
+concept_matrix.md
+paper_structure.md
+literature_base.csv
+status_report.md
+references.bib
+
+# LaTeX build artifacts
+latex/
+
+# Temp scripts
+check_bibtex*.py
+extract_citations.py
+extracted_citations.txt
+final_check.py
+update_paper.py
+
+# Reviews (private)
+Reviews and Comments/

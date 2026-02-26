@@ -24,6 +24,13 @@ by using PaperBanana to generate publication-quality diagrams and plots from tex
 descriptions or data files. Claude should produce ACTUAL FIGURES, not describe what
 to draw.
 
+> **Based on:** Zhu, D., Meng, R., Song, Y., Wei, X., Li, S., Pfister, T., & Yoon, J. (2026).
+> *PaperBanana: Automating Academic Illustration for AI Scientists.* [arXiv:2601.23265](https://arxiv.org/abs/2601.23265).
+> The pipeline uses a 5-agent, 2-phase architecture: Retriever → Planner → Stylist (Phase 1: planning),
+> then Visualizer ↔ Critic iterative refinement (Phase 2: generation) with VLM-as-Judge evaluation.
+> MCP integration via [`llmsresearch/paperbanana`](https://github.com/llmsresearch/paperbanana).
+> Official research repo: [`dwzhu-pku/PaperBanana`](https://github.com/dwzhu-pku/PaperBanana).
+
 ## Prerequisites
 
 The **paperbanana MCP server** must be running. It requires:

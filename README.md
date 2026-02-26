@@ -3,7 +3,7 @@
 > A Claude Code plugin that autonomously writes academic papers — from literature search to production-ready LaTeX/PDF.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Plugin Version](https://img.shields.io/badge/plugin-v5.1.0-green)]()
+[![Plugin Version](https://img.shields.io/badge/plugin-v5.3.0-green)]()
 [![Template](https://img.shields.io/badge/template-arxiv--style-orange)](https://github.com/kourgeorge/arxiv-style)
 
 ## Quick Start
@@ -56,9 +56,11 @@ The plugin bundles two MCP servers that start automatically:
 | MCP Server | pip package | What it does |
 |---|---|---|
 | `academic-search` | [`academic-search-mcp`](https://pypi.org/project/academic-search-mcp/) | Searches Semantic Scholar, OpenAlex, CrossRef, arXiv. Snowballing, BibTeX/CSV export. |
-| `paperbanana` | [`paperbanana`](https://pypi.org/project/paperbanana/) | AI figure generation via Google Gemini. Multi-agent pipeline with iterative refinement. |
+| `paperbanana` | [`paperbanana`](https://pypi.org/project/paperbanana/) | AI figure generation via Google Gemini. Multi-agent pipeline with iterative refinement. Based on [Zhu et al. (2026)](https://arxiv.org/abs/2601.23265). |
 
 Both are configured in `plugin.json` and start when Claude Code loads the plugin. No manual MCP setup needed.
+
+> **Academic foundation:** The figure generation pipeline implements the methodology from [PaperBanana: Automating Academic Illustration for AI Scientists](https://arxiv.org/abs/2601.23265) (Zhu et al., 2026). The MCP integration uses the community implementation at [`llmsresearch/paperbanana`](https://github.com/llmsresearch/paperbanana). See also the [official research repo](https://github.com/dwzhu-pku/PaperBanana).
 
 ### Step-by-Step
 
@@ -238,13 +240,13 @@ After `/write-paper` + `/export-latex`, your project directory contains:
 
 ## Figure Generation
 
-PaperBanana uses a multi-agent pipeline powered by Google Gemini:
+PaperBanana implements the multi-agent pipeline from [Zhu et al. (2026)](https://arxiv.org/abs/2601.23265), powered by Google Gemini:
 
 ```
-Planner → Stylist → Visualizer → Critic (×3 iterations) → Final PNG
+Retriever → Planner → Stylist → Visualizer → Critic (×3 iterations) → Final PNG
 ```
 
-The MCP server starts automatically when Claude Code loads the plugin. It reads `GOOGLE_API_KEY` from `.env` in your project directory.
+The 5-agent, 2-phase architecture uses in-context learning with curated reference examples (Phase 1: planning) and iterative VLM-as-Judge refinement (Phase 2: generation). The MCP server starts automatically when Claude Code loads the plugin and reads `GOOGLE_API_KEY` from `.env` in your project directory.
 
 | Environment | Engine | Quality |
 |---|---|---|
@@ -252,6 +254,8 @@ The MCP server starts automatically when Claude Code loads the plugin. It reads 
 | Cowork | matplotlib / seaborn | Clean statistical plots |
 
 If PaperBanana is unavailable (no API key, network issues), the figure-engine falls back to Python-based generation using matplotlib and seaborn with academic styling presets.
+
+> **References:** [Official research repo](https://github.com/dwzhu-pku/PaperBanana) · [Community MCP implementation](https://github.com/llmsresearch/paperbanana) · [arXiv:2601.23265](https://arxiv.org/abs/2601.23265)
 
 ---
 
@@ -303,6 +307,18 @@ If you use this tool in your research, please cite:
   author={Blask, Tobias-Benedikt and Funk, Burkhardt},
   year={2026},
   note={Available at \url{https://github.com/ProfDrT/From_Creator_to_Orchestrator}}
+}
+```
+
+The figure generation pipeline is based on:
+
+```bibtex
+@article{zhu2026paperbanana,
+  title={PaperBanana: Automating Academic Illustration for {AI} Scientists},
+  author={Zhu, Dawei and Meng, Rui and Song, Yale and Wei, Xiyu and Li, Sujian
+          and Pfister, Tomas and Yoon, Jinsung},
+  journal={arXiv preprint arXiv:2601.23265},
+  year={2026}
 }
 ```
 
