@@ -10,7 +10,7 @@
 
 ```bash
 # 1. Install the plugin
-/plugin marketplace add ProfDrT/open-paper-machine
+/plugin marketplace add TobiasBlask/open-paper-machine
 /plugin install open-academic-paper-machine@open-paper-machine
 
 # 2. Install dependencies
@@ -25,7 +25,7 @@ echo 'GOOGLE_API_KEY="your-key"' > .env
 
 That's it. The plugin ships both MCP servers (`academic-search` and `paperbanana`), all 7 skill engines, 8 slash commands, and the autonomous pipeline agent. Everything starts automatically.
 
-**Paper that built this tool:** [From Creator to Orchestrator](https://github.com/ProfDrT/From_Creator_to_Orchestrator) — a self-referential paper written entirely by this system.
+**Paper that built this tool:** [From Creator to Orchestrator](https://github.com/TobiasBlask/From_Creator_to_Orchestrator) — a self-referential paper written entirely by this system.
 
 ---
 
@@ -37,7 +37,7 @@ The machine runs autonomously through **6 phases**:
 |-------|-------------|----------|
 | **1. Reconnaissance** | 4-6 search queries across 4 academic APIs, snowballing, deduplication | Check scope, redirect if needed |
 | **2. Framing** | Theory selection, gap formulation, research questions, contribution statement | Confirm direction |
-| **3. Architecture** | Concept matrix, paper structure, word budget | Approve structure |
+| **3. Structure** | Concept matrix, paper structure, word budget | Approve structure |
 | **4. Production** | Write every section as complete paragraphs + generate figures | Read along, adjust |
 | **5. Assembly** | Compile all sections, quality self-assessment, status report | Start review |
 | **6. LaTeX & PDF** | Convert to arxiv-style LaTeX, resolve citations, compile PDF | Download and submit |
@@ -67,7 +67,7 @@ Both are configured in `plugin.json` and start when Claude Code loads the plugin
 **1. Add the marketplace and install the plugin:**
 
 ```bash
-/plugin marketplace add ProfDrT/open-paper-machine
+/plugin marketplace add TobiasBlask/open-paper-machine
 /plugin install open-academic-paper-machine@open-paper-machine
 ```
 
@@ -191,7 +191,7 @@ After `/write-paper` + `/export-latex`, your project directory contains:
 | `literature_base.csv` | Full literature database from search phase |
 | `concept_matrix.md` | Webster & Watson concept matrix |
 | `framing.md` | Theoretical framing (gap, RQs, contribution) |
-| `paper_structure.md` | Paper architecture with word budget |
+| `paper_structure.md` | Paper structure with word budget |
 | `figures/` | Generated diagrams and plots (PNG, 300 DPI) |
 | `status_report.md` | Completion status and open items |
 | `latex/paper.tex` | arxiv-style LaTeX source |
@@ -302,11 +302,11 @@ If you use this tool in your research, please cite:
 
 ```bibtex
 @article{blask2026creator,
-  title={From Creator to Orchestrator: How an {LLM} Agent Wrote This Paper
+  title={From Creator to Orchestrator? How an {LLM} Agent Wrote This Paper
          and What That Means for Science},
   author={Blask, Tobias-Benedikt and Funk, Burkhardt},
   year={2026},
-  note={Available at \url{https://github.com/ProfDrT/From_Creator_to_Orchestrator}}
+  note={Available at \url{https://github.com/TobiasBlask/From_Creator_to_Orchestrator}}
 }
 ```
 
