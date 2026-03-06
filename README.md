@@ -25,7 +25,9 @@ echo 'GOOGLE_API_KEY="your-key"' > .env
 
 That's it. The plugin ships both MCP servers (`academic-search` and `paperbanana`), all 8 skill engines, 8 slash commands, and the autonomous pipeline agent. Everything starts automatically.
 
-**Paper that built this tool:** [From Creator to Orchestrator? How an LLM Agent Wrote This Paper and What That Means for Science](https://papers.ssrn.com/abstract=6358440) (Blask & Funk, 2026) — a self-referential position paper written entirely by this system. [GitHub repo](https://github.com/TobiasBlask/From_Creator_to_Orchestrator).
+**Technical paper:** [The Open Academic Paper Machine: An Autonomous LLM Plugin for End-to-End Academic Paper Production](paper/paper.pdf) (Blask, 2026) — describes the system architecture, design principles, and evaluation. See [`paper/`](paper/) for the full LaTeX source.
+
+**Companion paper:** [From Creator to Orchestrator? How an LLM Agent Wrote This Paper and What That Means for Science](https://papers.ssrn.com/abstract=6358440) (Blask & Funk, 2026) — a self-referential position paper written entirely by this system. [GitHub repo](https://github.com/TobiasBlask/From_Creator_to_Orchestrator).
 
 ---
 
@@ -202,6 +204,7 @@ After `/write-paper` + `/export-latex`, your project directory contains:
 | `latex/paper.pdf` | Compiled PDF, ready for submission |
 | `verification_report.md` | Citation verification results *(after `/verify-citations`)* |
 | `latex/paper_diff.pdf` | Visual change tracking via latexdiff *(after `/respond-reviewers`)* |
+| `orchestration_log.md` | Audit trail: timestamps, actors, decisions, quality gate outcomes *(v5.2.0+)* |
 | `outputs/revision_log_rN.md` | Detailed change log per revision round *(after `/respond-reviewers`)* |
 
 ---
@@ -238,6 +241,12 @@ After `/write-paper` + `/export-latex`, your project directory contains:
 │   └── extract_annotations.py  # PDF annotation extraction (PyMuPDF)
 ├── templates/
 │   └── arxiv.sty               # arxiv-style LaTeX template
+├── paper/
+│   ├── paper.tex               # LaTeX source of the technical paper
+│   ├── paper.pdf               # Compiled PDF (Blask, 2026)
+│   ├── references.bib          # Bibliography
+│   ├── arxiv.sty               # arxiv-style template
+│   └── figures/                # PaperBanana-generated figures
 ├── .env.example                # API key template
 ├── .gitignore
 ├── LICENSE
@@ -336,7 +345,19 @@ The method-engine provides complete section templates for:
 
 ## Citation
 
-If you use this tool in your research, please cite:
+If you use this tool in your research, please cite the technical paper:
+
+```bibtex
+@article{blask2026opm,
+  title={The Open Academic Paper Machine: An Autonomous {LLM} Plugin for
+         End-to-End Academic Paper Production},
+  author={Blask, Tobias-Benedikt},
+  year={2026},
+  note={Available at \url{https://github.com/TobiasBlask/open-paper-machine/blob/main/paper/paper.pdf}}
+}
+```
+
+The companion paper (written entirely by this system):
 
 ```bibtex
 @article{blask2026creator,
