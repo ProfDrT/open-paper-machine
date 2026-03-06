@@ -606,6 +606,50 @@ Results:
 
 ---
 
+### PHASE 8: REVISION (Triggered by external feedback)
+**Goal:** Process reviewer or co-author feedback and implement revisions.
+**Time:** Execute when user provides annotated PDF, pasted reviewer comments, or R&R letter.
+**Checkpoint:** Approval of change plan before implementation.
+
+**Activation:** Only when user provides external feedback (not self-review from Phase 6).
+This phase can repeat: Round 1 -> Round 2 -> Round 3 -> ... until acceptance.
+
+**Uses:** review-engine skill (primary), plus figure-engine (if figure changes needed),
+writing-engine (if text expansion needed), latex-engine (recompilation).
+
+#### Actions:
+Read `skills/review-engine/SKILL.md` and execute the full 7-step workflow:
+1. **EXTRACT** review points from input (PDF annotations or pasted text)
+2. **MAP** each point to its location in `paper.tex`
+3. **CLASSIFY** action type (DELETE/REPLACE/MOVE/RESTRUCTURE/FIX/FIGURE/APPROVE/QUESTION) and priority
+4. **PLAN** and present change plan for approval (**QUALITY GATE**)
+5. **IMPLEMENT** changes in dependency order (terminology first, then deletions, moves, restructures, fixes, figures)
+6. **VERIFY** by recompiling LaTeX + generating latexdiff + sanity checks
+7. **DOCUMENT** with change log, optional revision letter, orchestration log entry, and git commit
+
+#### Deliverables:
+- Updated `paper.tex` with all approved changes (comment markers: `% [R{round}: ...]`)
+- `paper.pdf` -- recompiled, 0 errors
+- `paper_diff.pdf` -- visual change tracking via latexdiff
+- `outputs/revision_log_r{N}.md` -- detailed change log
+- Optional: `outputs/revision_letter.md` -- point-by-point R&R response
+
+#### Checkpoint 8:
+```
+📋 REVISION PLAN -- Round [N]
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Source: [annotated PDF / reviewer report]
+Review points: [N] total
+Actionable: [N] | Approved: [N] (no action) | Questions: [N]
+
+[Change plan table -- see review-engine Step 4]
+
+🔄 Approve plan to proceed with implementation.
+   -> Override: modify any proposed change before I execute.
+```
+
+---
+
 ## EXECUTION RULES
 
 ### Speed

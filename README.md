@@ -23,15 +23,15 @@ echo 'GOOGLE_API_KEY="your-key"' > .env
 /write-paper The impact of generative AI on organizational decision-making
 ```
 
-That's it. The plugin ships both MCP servers (`academic-search` and `paperbanana`), all 7 skill engines, 8 slash commands, and the autonomous pipeline agent. Everything starts automatically.
+That's it. The plugin ships both MCP servers (`academic-search` and `paperbanana`), all 8 skill engines, 8 slash commands, and the autonomous pipeline agent. Everything starts automatically.
 
-**Paper that built this tool:** [From Creator to Orchestrator](https://github.com/TobiasBlask/From_Creator_to_Orchestrator) — a self-referential paper written entirely by this system.
+**Paper that built this tool:** [From Creator to Orchestrator? How an LLM Agent Wrote This Paper and What That Means for Science](https://papers.ssrn.com/abstract=6358440) (Blask & Funk, 2026) — a self-referential position paper written entirely by this system. [GitHub repo](https://github.com/TobiasBlask/From_Creator_to_Orchestrator).
 
 ---
 
 ## How It Works
 
-The machine runs autonomously through **6 phases**:
+The machine runs autonomously through **8 phases**:
 
 | Phase | What Happens | Your Job |
 |-------|-------------|----------|
@@ -42,8 +42,11 @@ The machine runs autonomously through **6 phases**:
 | **5. Assembly** | Compile all sections, quality self-assessment, status report | Start review |
 | **6. LaTeX & PDF** | Convert to arxiv-style LaTeX, resolve citations, compile PDF | Download and submit |
 | **7. Verification** *(opt.)* | Fetch source abstracts/PDFs, verify each citation claim | Review flagged mismatches |
+| **8. Revision** *(repeatable)* | Extract reviewer/co-author feedback, classify, implement changes, recompile + latexdiff | Approve change plan |
 
 **Core principle:** The machine makes decisions and presents results. You steer at checkpoints.
+
+Phase 8 closes the loop: send an annotated PDF from your co-author or paste reviewer comments, and the review-engine extracts, classifies, and implements all changes — then recompiles and generates a visual diff. The cycle repeats (Round 1 → 2 → 3 → ...) until acceptance.
 
 ---
 
@@ -120,7 +123,7 @@ sudo apt-get install texlive-full
 | `/export-latex` | Convert finished draft to arxiv-style LaTeX + compiled PDF |
 | `/search-papers [topic]` | Phase 1 only: systematic literature search across 4 APIs |
 | `/draft-section [section]` | Write one specific section as complete paragraphs |
-| `/respond-reviewers` | Draft point-by-point R&R response letter |
+| `/respond-reviewers [pdf or comments]` | **Full revision loop** — extract feedback, classify, implement, recompile, latexdiff |
 | `/generate-figure [description]` | AI-generated academic diagram from text |
 | `/generate-plot [datafile] [intent]` | Statistical plot from CSV/JSON data |
 | `/verify-citations` | **Verify all citations** against actual source content |
@@ -131,7 +134,7 @@ sudo apt-get install texlive-full
 
 ### Skill Engines
 
-The plugin contains 7 specialized skill engines that the paper-machine agent orchestrates:
+The plugin contains 8 specialized skill engines that the paper-machine agent orchestrates:
 
 | Engine | Responsibility | Key Capabilities |
 |--------|---------------|-----------------|
@@ -142,6 +145,7 @@ The plugin contains 7 specialized skill engines that the paper-machine agent orc
 | **figure-engine** | Visual production | PaperBanana AI diagrams (Gemini) with matplotlib/seaborn fallback |
 | **latex-engine** | Document compilation | arxiv-style conversion, `\citep`/`\citet` citation resolution, PDF build |
 | **verification-engine** | Citation verification | Source retrieval (abstract + full-text), claim-source comparison, verification report |
+| **review-engine** | Revision automation | PDF annotation extraction, comment classification, change planning, latexdiff generation |
 
 ### MCP Servers (Bundled)
 
@@ -154,7 +158,7 @@ Both servers are declared in `plugin.json` and start automatically with the plug
 
 ### Pipeline Agent
 
-The `paper-machine` agent (`agents/paper-machine.md`) is an autonomous agent prompt that orchestrates all 7 skill engines through the pipeline phases. Operating principles:
+The `paper-machine` agent (`agents/paper-machine.md`) is an autonomous agent prompt that orchestrates all 8 skill engines through the pipeline phases. Operating principles:
 
 1. **DO, don't ask.** Make decisions and present results.
 2. **Produce text, not plans.** Every phase yields deliverable output.
@@ -197,6 +201,8 @@ After `/write-paper` + `/export-latex`, your project directory contains:
 | `latex/paper.tex` | arxiv-style LaTeX source |
 | `latex/paper.pdf` | Compiled PDF, ready for submission |
 | `verification_report.md` | Citation verification results *(after `/verify-citations`)* |
+| `latex/paper_diff.pdf` | Visual change tracking via latexdiff *(after `/respond-reviewers`)* |
+| `outputs/revision_log_rN.md` | Detailed change log per revision round *(after `/respond-reviewers`)* |
 
 ---
 
@@ -225,9 +231,11 @@ After `/write-paper` + `/export-latex`, your project directory contains:
 │   ├── method-engine/          # Research methodology
 │   ├── figure-engine/          # Figure generation (PaperBanana)
 │   ├── latex-engine/           # LaTeX conversion + compilation
-│   └── verification-engine/   # Citation verification against sources
+│   ├── verification-engine/   # Citation verification against sources
+│   └── review-engine/         # Revision automation (PDF annotation → implement → latexdiff)
 ├── scripts/
-│   └── md_to_latex.py          # Markdown-to-LaTeX converter (733 lines)
+│   ├── md_to_latex.py          # Markdown-to-LaTeX converter (733 lines)
+│   └── extract_annotations.py  # PDF annotation extraction (PyMuPDF)
 ├── templates/
 │   └── arxiv.sty               # arxiv-style LaTeX template
 ├── .env.example                # API key template
@@ -281,6 +289,36 @@ The verification-engine checks whether cited papers actually support the claims 
 
 ---
 
+## Revision Automation (Phase 8)
+
+The review-engine automates the co-author/reviewer revision loop — derived from 4 actual revision rounds on the paper that built this tool:
+
+```bash
+/respond-reviewers @annotated_review.pdf
+```
+
+**How it works:**
+
+```
+📄 Annotated PDF ──→ EXTRACT ──→ MAP ──→ CLASSIFY ──→ PLAN (Quality Gate)
+                                                            │
+                                              IMPLEMENT ──→ VERIFY ──→ DOCUMENT
+                                                                         │
+                     New Round ◄─────────────────────────────────────────┘
+```
+
+1. **EXTRACT** — Parses PDF annotations (highlights, sticky notes, strikeouts) via PyMuPDF, or parses pasted reviewer comments
+2. **MAP** — Locates each comment's corresponding position in `paper.tex` (line number, section, context)
+3. **CLASSIFY** — Determines action type (DELETE, REPLACE, MOVE, RESTRUCTURE, FIX, FIGURE, SHORTEN, APPROVE, QUESTION) and priority
+4. **PLAN** — Presents a structured change plan table for your approval (**quality gate** — nothing executes without your OK)
+5. **IMPLEMENT** — Executes changes in dependency order, invoking figure-engine or writing-engine as needed
+6. **VERIFY** — Recompiles LaTeX (0 errors target), generates `latexdiff` for visual change tracking
+7. **DOCUMENT** — Creates change log, optional R&R letter, updates orchestration log, commits
+
+**Supports:** Co-author annotated PDFs, journal R&R decision letters, self-review output. Handles multilingual comments (German/English). Repeats for Round 1 → 2 → 3 → ... until acceptance.
+
+---
+
 ## Supported Research Methods
 
 The method-engine provides complete section templates for:
@@ -306,7 +344,7 @@ If you use this tool in your research, please cite:
          and What That Means for Science},
   author={Blask, Tobias-Benedikt and Funk, Burkhardt},
   year={2026},
-  note={Available at \url{https://github.com/TobiasBlask/From_Creator_to_Orchestrator}}
+  note={Available at \url{https://papers.ssrn.com/abstract=6358440}}
 }
 ```
 
