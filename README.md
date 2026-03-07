@@ -3,8 +3,10 @@
 > A Claude Code plugin that autonomously writes academic papers — from literature search to production-ready LaTeX/PDF.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Plugin Version](https://img.shields.io/badge/plugin-v5.5.0-green)]()
+[![Plugin Version](https://img.shields.io/badge/plugin-v6.0.0-green)]()
 [![Template](https://img.shields.io/badge/template-arxiv--style-orange)](https://github.com/kourgeorge/arxiv-style)
+
+> **Scope note.** This project is a *technical* contribution: it explores what is *possible* with current LLM technology for academic paper production, not what is desirable or ethically permissible. The ethical, epistemological, and policy questions raised by AI-generated academic writing — authorship attribution, academic integrity, epistemic status, potential misuse — are important but outside the scope of this tool. They are addressed in the companion position paper ([Blask & Funk, 2026](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=6358578)).
 
 ## Quick Start
 
@@ -136,7 +138,7 @@ sudo apt-get install texlive-full
 | `/generate-figure [description]` | AI-generated academic diagram from text |
 | `/generate-plot [datafile] [intent]` | Statistical plot from CSV/JSON data |
 
-### Extended Capabilities (v5.5.0)
+### Extended Capabilities (v6.0.0)
 
 | Command | Description |
 |---------|-------------|
@@ -173,7 +175,7 @@ The plugin contains 14 specialized skill engines (~5,300 lines of domain knowled
 | **verification-engine** | Citation verification | Source retrieval (abstract + full-text), claim-source comparison, verification report |
 | **review-engine** | Revision automation | PDF annotation extraction, comment classification, change planning, latexdiff generation |
 
-#### Extended-Capability Engines (v5.5.0)
+#### Extended-Capability Engines (v6.0.0)
 
 | Engine | Responsibility | Key Capabilities |
 |--------|---------------|-----------------|
@@ -199,7 +201,7 @@ Both servers are declared in `plugin.json` and start automatically with the plug
 
 ### Pipeline Agent
 
-The `paper-machine` agent (`agents/paper-machine.md`, 706 lines) is an autonomous agent prompt that orchestrates all 14 skill engines through the pipeline phases. Since v5.5.0, the agent proactively suggests extended-capability engines at appropriate stages: screening after Phase 1, positioning after Phase 2, and the full post-production suite (peer review, submission, style analysis, slides) after Phase 6. Operating principles:
+The `paper-machine` agent (`agents/paper-machine.md`, 706 lines) is an autonomous agent prompt that orchestrates all 14 skill engines through the pipeline phases. Since v6.0.0, the agent proactively suggests extended-capability engines at appropriate stages: screening after Phase 1, positioning after Phase 2, and the full post-production suite (peer review, submission, style analysis, slides) after Phase 6. Operating principles:
 
 1. **DO, don't ask.** Make decisions and present results.
 2. **Produce text, not plans.** Every phase yields deliverable output.
