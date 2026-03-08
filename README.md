@@ -3,7 +3,7 @@
 > A Claude Code plugin that autonomously writes academic papers — from literature search to production-ready LaTeX/PDF.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Plugin Version](https://img.shields.io/badge/plugin-v6.1.0-green)]()
+[![Plugin Version](https://img.shields.io/badge/plugin-v6.2.0-green)]()
 [![Template](https://img.shields.io/badge/template-arxiv--style-orange)](https://github.com/kourgeorge/arxiv-style)
 
 > **Scope note.** This project is a *technical* contribution: it explores what is *possible* with current LLM technology for academic paper production, not what is desirable or ethically permissible. The ethical, epistemological, and policy questions raised by AI-generated academic writing — authorship attribution, academic integrity, epistemic status, potential misuse — are important but outside the scope of this tool. They are addressed in the companion position paper ([Blask & Funk, 2026](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=6358578)).
@@ -25,7 +25,7 @@ echo 'GOOGLE_API_KEY="your-key"' > .env
 /write-paper The impact of generative AI on organizational decision-making
 ```
 
-That's it. The plugin ships both MCP servers (`academic-search` and `paperbanana`), all 14 skill engines, 24 curated scientific skills, 15 slash commands, and the autonomous pipeline agent. Everything starts automatically.
+That's it. The plugin ships both MCP servers (`academic-search` and `paperbanana`), all 15 skill engines, 24 curated scientific skills, 16 slash commands, and the autonomous pipeline agent. Everything starts automatically.
 
 **Technical paper:** [The Open Academic Paper Machine: An Autonomous LLM Plugin for End-to-End Academic Paper Production](paper/paper.pdf) (Blask, 2026) — describes the system architecture, design principles, and evaluation. LaTeX source in [`paper/`](paper/).
 
@@ -138,6 +138,12 @@ sudo apt-get install texlive-full
 | `/generate-figure [description]` | AI-generated academic diagram from text |
 | `/generate-plot [datafile] [intent]` | Statistical plot from CSV/JSON data |
 
+### Qualitative Data Analysis (v6.2.0)
+
+| Command | Description |
+|---------|-------------|
+| `/analyze-interviews [topic]` | **Qualitative analysis pipeline** — structured summaries, thematic coding, cross-case analysis, evidence tables. Context-window-safe: summary-first, never loads all transcripts at once. Supports Gioia, Mayring, Braun & Clarke. |
+
 ### Extended Capabilities (v6.0.0)
 
 | Command | Description |
@@ -160,7 +166,7 @@ sudo apt-get install texlive-full
 
 ### Skill Engines
 
-The plugin contains 14 specialized skill engines (~5,300 lines of domain knowledge) that the paper-machine agent orchestrates, plus 24 curated scientific skills that auto-activate by context:
+The plugin contains 15 specialized skill engines (~5,800 lines of domain knowledge) that the paper-machine agent orchestrates, plus 24 curated scientific skills that auto-activate by context:
 
 #### Core Pipeline Engines
 
@@ -170,6 +176,7 @@ The plugin contains 14 specialized skill engines (~5,300 lines of domain knowled
 | **theory-engine** | Theoretical framing | Theory matching, gap formulation, hypothesis/design principle derivation |
 | **method-engine** | Research design | 13 method templates (SLR, DSR, case study, Gioia, Mayring, grounded theory, PLS-SEM, mixed, experiment/RCT, action research, ethnography, Delphi, simulation) + research data management |
 | **writing-engine** | Paragraph-level text production | Section templates, sentence formulas, academic register for IS/WI/BWL, style analysis (8 metrics) |
+| **qualitative-engine** | Qualitative data analysis | Summary-first transcript processing, thematic coding (Gioia/Mayring/Braun & Clarke), cross-case analysis, evidence tables |
 | **figure-engine** | Visual production | PaperBanana AI diagrams (Gemini) with matplotlib/seaborn fallback |
 | **latex-engine** | Document compilation | arxiv-style conversion, `\citep`/`\citet` citation resolution, PDF build |
 | **verification-engine** | Citation verification | Source retrieval (abstract + full-text), claim-source comparison, verification report |
@@ -201,7 +208,7 @@ Both servers are declared in `plugin.json` and start automatically with the plug
 
 ### Pipeline Agent
 
-The `paper-machine` agent (`agents/paper-machine.md`, 706 lines) is an autonomous agent prompt that orchestrates all 14 skill engines through the pipeline phases. Since v6.0.0, the agent proactively suggests extended-capability engines at appropriate stages: screening after Phase 1, positioning after Phase 2, and the full post-production suite (peer review, submission, style analysis, slides) after Phase 6. Operating principles:
+The `paper-machine` agent (`agents/paper-machine.md`, 720 lines) is an autonomous agent prompt that orchestrates all 15 skill engines through the pipeline phases. Since v6.0.0, the agent proactively suggests extended-capability engines at appropriate stages: screening after Phase 1, positioning after Phase 2, and the full post-production suite (peer review, submission, style analysis, slides) after Phase 6. Operating principles:
 
 1. **DO, don't ask.** Make decisions and present results.
 2. **Produce text, not plans.** Every phase yields deliverable output.
@@ -211,7 +218,7 @@ The `paper-machine` agent (`agents/paper-machine.md`, 706 lines) is an autonomou
 
 ### Scientific Skills Library (v6.1.0)
 
-Version 6.1.0 integrates **24 curated scientific skills** from [K-Dense AI's claude-scientific-skills](https://github.com/K-Dense-AI/claude-scientific-skills) (MIT License). These skills auto-activate based on context and complement the 14 core engines with domain-specific expertise:
+Version 6.1.0 integrates **24 curated scientific skills** from [K-Dense AI's claude-scientific-skills](https://github.com/K-Dense-AI/claude-scientific-skills) (MIT License). These skills auto-activate based on context and complement the 15 core engines with domain-specific expertise:
 
 | Category | Skills | Complements |
 |----------|--------|-------------|
@@ -264,6 +271,11 @@ After `/write-paper` + `/export-latex`, your project directory contains:
 | `latex/paper_diff.pdf` | Visual change tracking via latexdiff *(after `/respond-reviewers`)* |
 | `orchestration_log.md` | Audit trail: timestamps, actors, decisions, quality gate outcomes *(v5.2.0+)* |
 | `outputs/revision_log_rN.md` | Detailed change log per revision round *(after `/respond-reviewers`)* |
+| `interviews/summaries/` | Structured interview summaries *(after `/analyze-interviews`)* |
+| `outputs/codebook_v1.md` | First-order codes with definitions and examples *(after `/analyze-interviews`)* |
+| `outputs/theme_map.md` | Second-order themes grouped from codes *(after `/analyze-interviews`)* |
+| `outputs/cross_case_analysis.md` | Cross-interview comparison matrix *(after `/analyze-interviews`)* |
+| `outputs/evidence_table.md` | Verbatim quotes organized by theme *(after `/analyze-interviews`)* |
 
 ---
 
@@ -276,7 +288,7 @@ After `/write-paper` + `/export-latex`, your project directory contains:
 │   └── marketplace.json        # Marketplace definition for install
 ├── agents/
 │   └── paper-machine.md        # Autonomous pipeline agent (706 lines)
-├── commands/                    # 15 slash commands
+├── commands/                    # 16 slash commands
 │   ├── write-paper.md          # /write-paper  → full pipeline
 │   ├── search-papers.md        # /search-papers → Phase 1
 │   ├── screen-papers.md        # /screen-papers → SLR screening
@@ -285,6 +297,7 @@ After `/write-paper` + `/export-latex`, your project directory contains:
 │   ├── verify-citations.md     # /verify-citations → Phase 7
 │   ├── respond-reviewers.md    # /respond-reviewers → Phase 8
 │   ├── review-paper.md         # /review-paper → simulated peer review
+│   ├── analyze-interviews.md   # /analyze-interviews → qualitative analysis (v6.2.0)
 │   ├── analyze-positioning.md  # /analyze-positioning
 │   ├── analyze-writing.md      # /analyze-writing → style analysis
 │   ├── monitor-literature.md   # /monitor-literature
@@ -292,11 +305,12 @@ After `/write-paper` + `/export-latex`, your project directory contains:
 │   ├── generate-figure.md      # /generate-figure
 │   ├── generate-plot.md        # /generate-plot
 │   └── generate-slides.md      # /generate-slides
-├── skills/                      # 14 domain-specific engines (~5,300 lines)
+├── skills/                      # 15 domain-specific engines (~5,800 lines)
 │   ├── literature-engine/      # Systematic literature search + monitoring
 │   ├── theory-engine/          # Theoretical framing
 │   ├── method-engine/          # 13 research method templates + RDM
 │   ├── writing-engine/         # Academic writing templates + style analysis
+│   ├── qualitative-engine/    # Qualitative data analysis (v6.2.0)
 │   ├── figure-engine/          # Figure generation (PaperBanana)
 │   ├── latex-engine/           # LaTeX conversion + compilation
 │   ├── verification-engine/    # Citation verification against sources
@@ -317,7 +331,8 @@ After `/write-paper` + `/export-latex`, your project directory contains:
 │   └── ... (24 skills total)
 ├── scripts/
 │   ├── md_to_latex.py          # Markdown-to-LaTeX converter (732 lines)
-│   └── extract_annotations.py  # PDF annotation extraction (PyMuPDF)
+│   ├── extract_annotations.py  # PDF annotation extraction (PyMuPDF)
+│   └── process_interviews.py   # Interview transcript processing (v6.2.0)
 ├── templates/
 │   └── arxiv.sty               # arxiv-style LaTeX template
 ├── paper/                       # Technical paper (Blask, 2026)

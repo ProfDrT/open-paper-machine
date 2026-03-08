@@ -325,6 +325,8 @@ Save all figures to `figures/` and reference with `\ref{fig:label}` in the text.
 - Add quality criteria section
 - For SLR: include search strategy, PRISMA template, screening criteria
 - For qualitative: include sampling, data collection, analysis approach
+- If interview transcripts exist in `interviews/`, activate the **qualitative-engine**
+  to generate structured summaries first, then code and analyze
 - For DSR: include design requirements, kernel theories, evaluation plan
 
 **4d. Results/Findings**
@@ -333,6 +335,9 @@ Save all figures to `figures/` and reference with `\ref{fig:label}` in the text.
   - Thematic synthesis organized by concept matrix columns
   - Include concept matrix as a table
 - If empirical with data: structure results around RQs/hypotheses
+- If qualitative with interview data: use **qualitative-engine** outputs
+  (theme map, cross-case matrix, evidence table) to structure findings by theme.
+  NEVER load all transcripts at once — work from summaries in `interviews/summaries/`
 - If no data yet: create detailed placeholder structure with [DATA NEEDED] markers
 
 **4e. Discussion** (writing-engine: 5-block formula)
