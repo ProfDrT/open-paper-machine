@@ -205,6 +205,12 @@ open-paper-machine/
 |   +-- submission-engine/       (389 lines)
 |   +-- presentation-engine/     (273 lines)
 |   +-- coauthor-engine/         (179 lines)
++-- scientific-skills/          # 24 curated skills (v6.1.0)
+|   +-- hypothesis-generation/  # Research ideation
+|   +-- scientific-writing/     # IMRAD, reporting guidelines
+|   +-- statistical-analysis/   # Test selection, APA reporting
+|   +-- venue-templates/        # 30+ venue LaTeX templates
+|   +-- ... (24 skills total)
 +-- scripts/
 |   +-- md_to_latex.py          # Markdown->LaTeX (732 lines)
 |   +-- extract_annotations.py  # PDF annotation extractor
@@ -218,7 +224,7 @@ The plugin manifest (Listing~\ref{lst:manifest}) declares the system's identity 
 {
   "name": "open-academic-paper-machine",
   "description": "Autonomous academic paper production system",
-  "version": "6.0.0",
+  "version": "6.1.0",
   "author": { "name": "Prof. Dr. Tobias Blask" },
   "license": "MIT",
   "mcpServers": {
@@ -294,6 +300,8 @@ Table~\ref{tab:engines} summarizes all fourteen skill engines, organized into ei
 
 Version~6.0.0 added six extended-capability engines that complement the core pipeline. The \emph{screening engine} (383~lines) implements PRISMA-compliant title/abstract and full-text screening for systematic literature reviews, including quality assessment checklists and automated PRISMA flow diagram generation. The \emph{peer-review engine} (506~lines) simulates double-blind peer review by generating two independent reviewer reports calibrated to the standards of top IS/CS venues, producing output that feeds directly into the review engine for systematic revision. The \emph{positioning engine} (286~lines) analyzes the paper's differentiation from the closest related work by constructing a multi-dimensional comparison matrix. The \emph{submission engine} (389~lines) prepares venue-specific submission packages including anonymization checks, cover letter generation, and reviewer suggestions. The \emph{presentation engine} (273~lines) generates conference slide decks with speaker notes from a completed manuscript. The \emph{co-author engine} (179~lines) tracks multi-author contributions using the CRediT taxonomy and documents the human-AI division of labor. Version~6.0.0 also extended the literature engine (222$\to$346~lines) with monitoring capabilities for living literature reviews, and the writing engine (348$\to$450~lines) with a style analysis mode covering eight quality metrics (passive voice ratio, weak openings, hedging balance, sentence length variation, word repetitions, paragraph consistency, transition quality, and citation integration style).
 
+Version~6.1.0 introduced a complementary layer of domain-specific expertise by integrating 24~curated scientific skills from the K-Dense AI open-source collection\footnote{\url{https://github.com/K-Dense-AI/claude-scientific-skills}, MIT License.}---a community repository of over 170 ready-to-use agent skill files following the Agent Skills standard (\url{https://agentskills.io}). While the 14~core engines encode the \emph{procedural} knowledge for orchestrating the paper production pipeline (what to do when), the scientific skills provide \emph{declarative} domain knowledge that enriches generation quality across six categories: research ideation (hypothesis generation, scientific brainstorming, multi-perspective deliberation via a ``consciousness council''), scientific writing conventions (IMRAD structure, reporting guidelines, citation management), statistical analysis (test selection, APA reporting, statsmodels), visualization (matplotlib, seaborn, plotly with publication styling), submission formatting (venue-specific \LaTeX\ templates for 30+ venues, grant writing), and reference management (Zotero integration). These skills are stored in \texttt{scientific-skills/} and are auto-discovered by Claude Code's skill system based on their YAML frontmatter descriptions---the LLM loads them on demand when the current task matches a skill's activation criteria, without consuming context window capacity when they are not needed. This integration operationalizes DP2 (Skill Modularity) at a second level: the core engines define \emph{what} the pipeline does, while the scientific skills enrich \emph{how well} it does it.
+
 \begin{table}[t]
 \centering
 \caption{Skill engine summary. Each engine is a single \texttt{SKILL.md} file encoding domain expertise as structured natural language instructions. Total knowledge base: approximately 5,300 lines of Markdown across 14 engines. For extended-capability engines, the ``Phase'' column notation ``N+'' indicates availability from Phase~N onwards (e.g., ``1+'' means the engine can be invoked at any point after Phase~1).}
@@ -326,7 +334,7 @@ Co-Author & 179 & --- & CRediT contribution tracking, human-AI labor documentati
 \begin{figure}[t]
 \centering
 \includegraphics[width=0.95\textwidth]{figures/fig1_system_architecture.png}
-\caption{System architecture of the Open Academic Paper Machine (v6.0.0) showing the four-layer design: orchestration layer (pipeline agent with human checkpoints via fifteen slash commands), skill engine layer (fourteen specialized engines---eight core plus six extended---including thirteen research method templates), tool layer (two MCP servers distributed via PyPI connecting to external APIs), and output layer (structured artifacts per phase). The orchestration audit trail (\texttt{orchestration\_log.md}) records timestamps, actors, and quality gate decisions across all phases.}
+\caption{System architecture of the Open Academic Paper Machine (v6.1.0) showing the four-layer design: orchestration layer (pipeline agent with human checkpoints via fifteen slash commands), skill engine layer (fourteen specialized engines---eight core plus six extended---augmented by 24 curated scientific skills, including thirteen research method templates), tool layer (two MCP servers distributed via PyPI connecting to external APIs), and output layer (structured artifacts per phase). The orchestration audit trail (\texttt{orchestration\_log.md}) records timestamps, actors, and quality gate decisions across all phases.}
 \label{fig:architecture}
 \end{figure}
 
@@ -514,7 +522,7 @@ Future research should pursue four directions: (1) multi-case evaluation with in
 \section{Conclusion}
 % ============================================================================
 
-This paper has presented the Open Academic Paper Machine, an open-source plugin for the Claude Code development environment that autonomously executes the full academic paper production pipeline. The system comprises fourteen modular skill engines---eight for the core pipeline and six for extended capabilities such as simulated peer review, SLR screening, and submission preparation---two MCP servers for external tool access, and an eight-phase pipeline with human-in-the-loop checkpoints, covering the complete path from research topic to compiled \LaTeX/PDF manuscript.
+This paper has presented the Open Academic Paper Machine, an open-source plugin for the Claude Code development environment that autonomously executes the full academic paper production pipeline. The system comprises fourteen modular skill engines---eight for the core pipeline and six for extended capabilities such as simulated peer review, SLR screening, and submission preparation---complemented by 24~curated scientific skills for domain-specific expertise, two MCP servers for external tool access, and an eight-phase pipeline with human-in-the-loop checkpoints, covering the complete path from research topic to compiled \LaTeX/PDF manuscript.
 
 Following a Design Science Research methodology, we described the system's architecture, demonstrated its capabilities through a self-referential case study, and articulated five design principles for LLM-based scholarly automation. Our findings reveal a productive tension: the system can produce structurally complete, well-cited academic manuscripts---a notable capability given the complexity of academic writing conventions---yet the intellectual depth, theoretical originality, and critical reasoning of human researchers remain beyond its current reach.
 

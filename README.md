@@ -3,7 +3,7 @@
 > A Claude Code plugin that autonomously writes academic papers — from literature search to production-ready LaTeX/PDF.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Plugin Version](https://img.shields.io/badge/plugin-v6.0.0-green)]()
+[![Plugin Version](https://img.shields.io/badge/plugin-v6.1.0-green)]()
 [![Template](https://img.shields.io/badge/template-arxiv--style-orange)](https://github.com/kourgeorge/arxiv-style)
 
 > **Scope note.** This project is a *technical* contribution: it explores what is *possible* with current LLM technology for academic paper production, not what is desirable or ethically permissible. The ethical, epistemological, and policy questions raised by AI-generated academic writing — authorship attribution, academic integrity, epistemic status, potential misuse — are important but outside the scope of this tool. They are addressed in the companion position paper ([Blask & Funk, 2026](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=6358578)).
@@ -25,7 +25,7 @@ echo 'GOOGLE_API_KEY="your-key"' > .env
 /write-paper The impact of generative AI on organizational decision-making
 ```
 
-That's it. The plugin ships both MCP servers (`academic-search` and `paperbanana`), all 14 skill engines, 15 slash commands, and the autonomous pipeline agent. Everything starts automatically.
+That's it. The plugin ships both MCP servers (`academic-search` and `paperbanana`), all 14 skill engines, 24 curated scientific skills, 15 slash commands, and the autonomous pipeline agent. Everything starts automatically.
 
 **Technical paper:** [The Open Academic Paper Machine: An Autonomous LLM Plugin for End-to-End Academic Paper Production](paper/paper.pdf) (Blask, 2026) — describes the system architecture, design principles, and evaluation. LaTeX source in [`paper/`](paper/).
 
@@ -160,7 +160,7 @@ sudo apt-get install texlive-full
 
 ### Skill Engines
 
-The plugin contains 14 specialized skill engines (~5,300 lines of domain knowledge) that the paper-machine agent orchestrates:
+The plugin contains 14 specialized skill engines (~5,300 lines of domain knowledge) that the paper-machine agent orchestrates, plus 24 curated scientific skills that auto-activate by context:
 
 #### Core Pipeline Engines
 
@@ -208,6 +208,23 @@ The `paper-machine` agent (`agents/paper-machine.md`, 706 lines) is an autonomou
 3. **Checkpoint, don't block.** Present work, then continue.
 4. **Be explicit about decisions.** State what was chosen and why.
 5. **Save everything to files.** Every phase produces artifacts.
+
+### Scientific Skills Library (v6.1.0)
+
+Version 6.1.0 integrates **24 curated scientific skills** from [K-Dense AI's claude-scientific-skills](https://github.com/K-Dense-AI/claude-scientific-skills) (MIT License). These skills auto-activate based on context and complement the 14 core engines with domain-specific expertise:
+
+| Category | Skills | Complements |
+|----------|--------|-------------|
+| **Research Ideation** | `hypothesis-generation`, `scientific-brainstorming`, `scientific-critical-thinking`, `consciousness-council`, `what-if-oracle` | theory-engine |
+| **Writing** | `scientific-writing`, `citation-management`, `markdown-mermaid-writing` | writing-engine |
+| **Literature & Review** | `literature-review`, `peer-review`, `scholar-evaluation` | literature/review-engine |
+| **Statistics** | `statistical-analysis`, `exploratory-data-analysis`, `statsmodels` | method-engine |
+| **Visualization** | `matplotlib`, `seaborn`, `plotly`, `scientific-visualization`, `scientific-schematics` | figure-engine |
+| **Submission** | `venue-templates`, `research-grants` | submission/latex-engine |
+| **Reference Management** | `pyzotero` | verification-engine |
+| **Utility** | `get-available-resources`, `networkx` | general |
+
+Skills are stored in `scientific-skills/` and follow the [Agent Skills](https://agentskills.io/) standard. Each skill is a `SKILL.md` file with YAML frontmatter and structured domain knowledge. Claude Code discovers and loads them automatically when relevant to the current task.
 
 ### Markdown-to-LaTeX Converter
 
@@ -290,6 +307,14 @@ After `/write-paper` + `/export-latex`, your project directory contains:
 │   ├── submission-engine/      # Venue-specific submission preparation
 │   ├── presentation-engine/    # Conference slide generation
 │   └── coauthor-engine/        # CRediT author contribution tracking
+├── scientific-skills/              # 24 curated skills from K-Dense AI (v6.1.0)
+│   ├── hypothesis-generation/     # Structured hypothesis formulation
+│   ├── scientific-writing/        # IMRAD, reporting guidelines, APA/AMA
+│   ├── statistical-analysis/      # Test selection, APA reporting
+│   ├── matplotlib/                # Publication-quality plots
+│   ├── venue-templates/           # LaTeX templates for 30+ venues
+│   ├── consciousness-council/     # Multi-perspective deliberation
+│   └── ... (24 skills total)
 ├── scripts/
 │   ├── md_to_latex.py          # Markdown-to-LaTeX converter (732 lines)
 │   └── extract_annotations.py  # PDF annotation extraction (PyMuPDF)
