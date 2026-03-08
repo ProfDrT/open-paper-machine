@@ -43,3 +43,23 @@
 **Input:** Style analysis of revised paper.tex (19 pages, post-R1 revision)
 **Output:** writing_analysis.md — section-by-section quality scores (8 metrics × 8 sections), 12 specific improvement suggestions with rewrites, 3 priority items identified
 **Summary:** Overall quality Strong to Adequate. No weak openings detected. Key issues: repetitive "Author (Year) verb" pattern in Related Work §2.1 (9 occurrences), dense Introduction paragraph 2 (~10 sentences), and several sentences exceeding 40 words. Estimated revision effort: Light (2-3 hours).
+
+---
+
+## Version Update: v6.0.0 → v6.1.0
+**Timestamp:** 2026-03-08T09:15:00Z
+**Actor:** AI Agent + Human (plugin update by author, paper updates by AI agent)
+**Action:** Updated paper to reflect plugin v6.1.0 (24 curated scientific skills from K-Dense AI)
+
+### Paper Changes
+1. **Abstract:** Added mention of 24 curated scientific skills
+2. **Contribution statement (§1):** Updated version reference from v6.0.0 to v6.1.0
+3. **Design and Development Process (§3.1):** Added v6.1.0 to version history
+4. **Directory structure listing caption:** Updated from v6.0.0 to v6.1.0, added skill count
+5. **System Design (§4.2):** New paragraph describing v6.1.0 scientific skills integration (already added by author)
+6. **Version scope (§5.2):** Added v6.1.0 mention clarifying skills don't alter core pipeline evaluation
+7. **Conclusion:** Updated to mention 24 scientific skills (already added by author)
+8. **Fig 1 (system architecture):** Regenerated to show 24 scientific skills in 6 categories, fixed v5.5.0→v6.0.0 label for extended engines, updated title to v6.1.0
+9. **Fig 1 caption:** Updated to reference v6.1.0 and scientific skills (already added by author)
+
+**Output artifacts:** paper.tex (updated), paper.pdf (19 pages, recompiled), fig1_system_architecture.png (regenerated)
