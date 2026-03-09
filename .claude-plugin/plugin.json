@@ -1,6 +1,6 @@
 {
   "name": "open-academic-paper-machine",
-  "description": "Open Academic Paper Machine — Autonomous academic paper production system. Uses MCP academic-search tools (Semantic Scholar, OpenAlex, CrossRef, arXiv) for literature search, snowballing, and export. PaperBanana MCP for AI figure generation based on Zhu et al. (2026, arXiv:2601.23265). 15 skill engines (literature, theory, method, writing, qualitative, figure, verification, LaTeX, review + screening, peer review, positioning, submission, presentation, co-author) with fill-in-the-blank templates. 24 curated scientific skills from K-Dense AI (scientific-writing, statistical-analysis, visualization, hypothesis-generation, venue-templates, and more). 16 slash commands including /write-paper for the full 8-phase pipeline, /analyze-interviews for qualitative data analysis, /review-paper for simulated peer review, /screen-papers for SLR screening, /prepare-submission for venue-specific submission, /analyze-positioning, /analyze-writing, /monitor-literature, and /generate-slides.",
+  "description": "Open Academic Paper Machine — Autonomous academic paper production system. Uses MCP academic-search tools (Semantic Scholar, OpenAlex, CrossRef, arXiv) for literature search, snowballing, and export. PaperBanana for AI figure generation based on Zhu et al. (2026, arXiv:2601.23265) — direct Python API (primary, reliable) with MCP fallback. 15 skill engines (literature, theory, method, writing, qualitative, figure, verification, LaTeX, review + screening, peer review, positioning, submission, presentation, co-author) with fill-in-the-blank templates. 24 curated scientific skills from K-Dense AI (scientific-writing, statistical-analysis, visualization, hypothesis-generation, venue-templates, and more). 16 slash commands including /write-paper for the full 8-phase pipeline, /analyze-interviews for qualitative data analysis, /review-paper for simulated peer review, /screen-papers for SLR screening, /prepare-submission for venue-specific submission, /analyze-positioning, /analyze-writing, /monitor-literature, and /generate-slides.",
   "version": "6.2.0",
   "author": { "name": "Prof. Dr. Tobias Blask" },
   "license": "MIT",
@@ -11,7 +11,7 @@
     },
     "paperbanana": {
       "command": "sh",
-      "args": ["-c", "if [ -f \"$PWD/.env\" ]; then set -a; . \"$PWD/.env\"; set +a; fi; exec paperbanana-mcp"],
+      "args": ["-c", "if [ -n \"$GOOGLE_API_KEY\" ]; then :; elif [ -f \"$HOME/.paperbanana.env\" ]; then set -a; . \"$HOME/.paperbanana.env\"; set +a; elif [ -f \"$PWD/.env\" ]; then set -a; . \"$PWD/.env\"; set +a; fi; exec paperbanana-mcp"],
       "env": { "GOOGLE_API_KEY": "${GOOGLE_API_KEY}" }
     }
   }

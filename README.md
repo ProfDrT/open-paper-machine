@@ -19,13 +19,14 @@
 pip install paperbanana[mcp,google] academic-search-mcp
 
 # 3. Set up your API key (free — https://aistudio.google.com/apikey)
-echo 'GOOGLE_API_KEY="your-key"' > .env
+echo 'GOOGLE_API_KEY="your-key"' > ~/.paperbanana.env
+# Or per-project: echo 'GOOGLE_API_KEY="your-key"' > .env
 
 # 4. Go
 /write-paper The impact of generative AI on organizational decision-making
 ```
 
-That's it. The plugin ships both MCP servers (`academic-search` and `paperbanana`), all 15 skill engines, 24 curated scientific skills, 16 slash commands, and the autonomous pipeline agent. Everything starts automatically.
+That's it. The plugin ships both MCP servers (`academic-search` and `paperbanana`), the direct PaperBanana Python API for reliable figure generation, all 15 skill engines, 24 curated scientific skills, 16 slash commands, and the autonomous pipeline agent. Everything starts automatically.
 
 **Technical paper:** [The Open Academic Paper Machine: An Autonomous LLM Plugin for End-to-End Academic Paper Production](paper/paper.pdf) (Blask, 2026) — describes the system architecture, design principles, and evaluation. LaTeX source in [`paper/`](paper/).
 
@@ -90,13 +91,17 @@ pip install paperbanana[mcp,google] academic-search-mcp
 
 **3. Configure your Google API key** (needed for AI figure generation):
 
-Get a free key at [Google AI Studio](https://aistudio.google.com/apikey), then create a `.env` file in your **project root** (where you run Claude Code):
+Get a free key at [Google AI Studio](https://aistudio.google.com/apikey), then set it up (choose one):
 
 ```bash
-GOOGLE_API_KEY="your-api-key-here"
+# Option A — Global (recommended, works across all projects):
+echo 'GOOGLE_API_KEY="your-api-key-here"' > ~/.paperbanana.env
+
+# Option B — Per-project:
+echo 'GOOGLE_API_KEY="your-api-key-here"' > .env
 ```
 
-The PaperBanana MCP server loads `.env` automatically on startup. Never commit `.env` to version control. See `.env.example` for a template.
+**Key loading priority:** Environment variable → `~/.paperbanana.env` → project `.env`. Never commit `.env` to version control. See `.env.example` for a template.
 
 **4. Install LaTeX** (for PDF compilation):
 
@@ -155,6 +160,7 @@ sudo apt-get install texlive-full
 | `/prepare-submission [venue]` | Venue-specific submission package: anonymization, cover letter, reviewer suggestions |
 | `/monitor-literature` | Re-run search queries, find papers published since last search |
 | `/generate-slides [format]` | Conference presentation slides with speaker notes (Marp-compatible) |
+| `/analyze-interviews [transcripts]` | Qualitative interview analysis — thematic coding, cross-case analysis, evidence tables |
 
 ---
 
@@ -177,7 +183,7 @@ The plugin contains 15 specialized skill engines (~5,800 lines of domain knowled
 | **method-engine** | Research design | 13 method templates (SLR, DSR, case study, Gioia, Mayring, grounded theory, PLS-SEM, mixed, experiment/RCT, action research, ethnography, Delphi, simulation) + research data management |
 | **writing-engine** | Paragraph-level text production | Section templates, sentence formulas, academic register for IS/WI/BWL, style analysis (8 metrics) |
 | **qualitative-engine** | Qualitative data analysis | Summary-first transcript processing, thematic coding (Gioia/Mayring/Braun & Clarke), cross-case analysis, evidence tables |
-| **figure-engine** | Visual production | PaperBanana AI diagrams (Gemini) with matplotlib/seaborn fallback |
+| **figure-engine** | Visual production | PaperBanana AI diagrams (Gemini) via direct Python API (primary) with MCP and matplotlib/seaborn fallback |
 | **latex-engine** | Document compilation | arxiv-style conversion, `\citep`/`\citet` citation resolution, PDF build |
 | **verification-engine** | Citation verification | Source retrieval (abstract + full-text), claim-source comparison, verification report |
 | **review-engine** | Revision automation | PDF annotation extraction, comment classification, change planning, latexdiff generation |
@@ -191,6 +197,7 @@ The plugin contains 15 specialized skill engines (~5,800 lines of domain knowled
 | **positioning-engine** | Competitive positioning | Differentiation matrix, unique positioning analysis, draft positioning paragraph |
 | **submission-engine** | Submission preparation | Anonymization checks, cover letter generation, reviewer suggestions, venue formatting validation |
 | **presentation-engine** | Slide generation | Conference slides with speaker notes from paper, Marp-compatible output |
+| **qualitative-engine** | Qualitative analysis | Interview transcript analysis, thematic coding, cross-case analysis, evidence tables |
 | **coauthor-engine** | Author management | CRediT contribution tracking, human-AI division of labor documentation |
 
 ### MCP Servers (Bundled)
@@ -304,7 +311,8 @@ After `/write-paper` + `/export-latex`, your project directory contains:
 │   ├── prepare-submission.md   # /prepare-submission
 │   ├── generate-figure.md      # /generate-figure
 │   ├── generate-plot.md        # /generate-plot
-│   └── generate-slides.md      # /generate-slides
+│   ├── generate-slides.md      # /generate-slides
+│   └── analyze-interviews.md   # /analyze-interviews
 ├── skills/                      # 15 domain-specific engines (~5,800 lines)
 │   ├── literature-engine/      # Systematic literature search + monitoring
 │   ├── theory-engine/          # Theoretical framing
@@ -320,6 +328,7 @@ After `/write-paper` + `/export-latex`, your project directory contains:
 │   ├── positioning-engine/     # Competitive positioning analysis
 │   ├── submission-engine/      # Venue-specific submission preparation
 │   ├── presentation-engine/    # Conference slide generation
+│   ├── qualitative-engine/     # Interview analysis + thematic coding
 │   └── coauthor-engine/        # CRediT author contribution tracking
 ├── scientific-skills/              # 24 curated skills from K-Dense AI (v6.1.0)
 │   ├── hypothesis-generation/     # Structured hypothesis formulation
@@ -332,7 +341,8 @@ After `/write-paper` + `/export-latex`, your project directory contains:
 ├── scripts/
 │   ├── md_to_latex.py          # Markdown-to-LaTeX converter (732 lines)
 │   ├── extract_annotations.py  # PDF annotation extraction (PyMuPDF)
-│   └── process_interviews.py   # Interview transcript processing (v6.2.0)
+│   ├── process_interviews.py   # Interview transcript processing (v6.2.0)
+│   └── paperbanana_direct.py   # Direct PaperBanana API (bypasses MCP transport)
 ├── templates/
 │   └── arxiv.sty               # arxiv-style LaTeX template
 ├── paper/                       # Technical paper (Blask, 2026)
@@ -356,11 +366,41 @@ PaperBanana implements the multi-agent pipeline from [Zhu et al. (2026)](https:/
 Retriever → Planner → Stylist → Visualizer → Critic (×3 iterations) → Final PNG
 ```
 
-The 5-agent, 2-phase architecture uses in-context learning with curated reference examples (Phase 1: planning) and iterative VLM-as-Judge refinement (Phase 2: generation). The MCP server starts automatically when Claude Code loads the plugin and reads `GOOGLE_API_KEY` from `.env` in your project directory.
+The 5-agent, 2-phase architecture uses in-context learning with curated reference examples (Phase 1: planning) and iterative VLM-as-Judge refinement (Phase 2: generation).
+
+### Direct Python API (v6.2.0)
+
+Since v6.2.0, the figure-engine calls PaperBanana's Python API directly via `asyncio.run()`, bypassing the MCP stdio transport layer. This eliminates the reliability issues (timeouts, silent failures) that affected the MCP transport in long-running generation pipelines (~35–45 seconds per figure).
+
+**Reliability chain:** Direct Python API (primary) → MCP tools (fallback) → matplotlib/seaborn (last resort).
+
+The wrapper script `scripts/paperbanana_direct.py` supports all PaperBanana features:
+
+```bash
+# Generate a methodology diagram
+python3 scripts/paperbanana_direct.py diagram \
+  --source-context "Our method uses a transformer encoder..." \
+  --caption "Figure 1: System Architecture" \
+  --output-dir figures/ \
+  --filename "fig_architecture.png" \
+  --iterations 3 \
+  --aspect-ratio 16:9
+
+# Generate a statistical plot
+python3 scripts/paperbanana_direct.py plot \
+  --data '{"model": ["GPT-4", "Claude", "Gemini"], "accuracy": [0.89, 0.92, 0.87]}' \
+  --caption "Model comparison on benchmark" \
+  --output-dir figures/
+
+# Download expanded reference set (294 examples, ~257 MB, one-time)
+python3 scripts/paperbanana_direct.py download-references
+```
+
+**API key loading priority:** `GOOGLE_API_KEY` environment variable → `~/.paperbanana.env` → project `.env`.
 
 | Environment | Engine | Quality |
 |---|---|---|
-| Claude Code | PaperBanana + Gemini | AI-generated, publication-quality |
+| Claude Code | PaperBanana + Gemini (direct API) | AI-generated, publication-quality |
 | Cowork | matplotlib / seaborn | Clean statistical plots |
 
 If PaperBanana is unavailable (no API key, network issues), the figure-engine falls back to Python-based generation using matplotlib and seaborn with academic styling presets.

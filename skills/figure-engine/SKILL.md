@@ -2,9 +2,10 @@
 name: figure-engine
 description: >
   Activate when the user needs to generate, refine, or evaluate academic figures,
-  diagrams, or statistical plots. Uses PaperBanana (paperbanana MCP server) to
-  transform text descriptions or data files into publication-quality illustrations.
-  Supports methodology diagrams, statistical plots, and comparative evaluation.
+  diagrams, or statistical plots. Uses PaperBanana to transform text descriptions
+  or data files into publication-quality illustrations. Primary method: direct
+  Python API call (bypasses unreliable MCP transport). Fallback: MCP tools or
+  matplotlib/seaborn.
 ---
 
 > **Orchestration Log**: When this skill is activated, append a log entry to `outputs/orchestration_log.md`:
@@ -28,105 +29,143 @@ to draw.
 > *PaperBanana: Automating Academic Illustration for AI Scientists.* [arXiv:2601.23265](https://arxiv.org/abs/2601.23265).
 > The pipeline uses a 5-agent, 2-phase architecture: Retriever → Planner → Stylist (Phase 1: planning),
 > then Visualizer ↔ Critic iterative refinement (Phase 2: generation) with VLM-as-Judge evaluation.
-> MCP integration via [`llmsresearch/paperbanana`](https://github.com/llmsresearch/paperbanana).
 > Official research repo: [`dwzhu-pku/PaperBanana`](https://github.com/dwzhu-pku/PaperBanana).
 
 ## Prerequisites
 
-The **paperbanana MCP server** must be running. It requires:
-- `pip install paperbanana[mcp,google]`
-- A `GOOGLE_API_KEY` in a `.env` file in the project root (get a free key at https://aistudio.google.com/apikey)
+PaperBanana must be installed: `pip install paperbanana[mcp,google]`
 
-The MCP server is configured in `plugin.json` and starts automatically. It loads the Google API key from `.env` in the project's working directory.
+A `GOOGLE_API_KEY` must be available via one of:
+- Environment variable `GOOGLE_API_KEY`
+- `.env` file in project root
+- `~/.paperbanana.env`
 
-If the MCP server is NOT available, fall back to generating figures with Python
-(matplotlib, seaborn, plotly) directly.
-
----
-
-## When the User Says "Make Me a Figure" — What to Do
-
-1. **Determine figure type**: diagram (methodology, framework, process) or plot (bar, line, scatter, etc.)
-2. **Gather input**: text description for diagrams, data file for plots
-3. **Generate using PaperBanana MCP tools** if available, otherwise Python fallback
-4. **Save to figures/ directory** in the working folder
-5. **Provide LaTeX include snippet** ready for copy-paste
+Get a free key at https://aistudio.google.com/apikey
 
 ---
 
-## Tool 1: Generate Diagram
+## CRITICAL: Method Priority — Direct Python API First
 
-**Use for:** Methodology overviews, theoretical frameworks, process flows,
-architecture diagrams, research design figures.
+> **The MCP transport layer (stdio) for PaperBanana is unreliable.** It frequently
+> times out, hangs, or fails silently. The direct Python API works perfectly and
+> is 100% reliable. **ALWAYS use Method 1 (Direct Python API) first.**
 
-**MCP Tool:** `paperbanana_generate_diagram` (if paperbanana MCP is connected)
+### Priority Order:
+1. **PRIMARY — Direct Python API** (via Bash → python3) — ALWAYS try this first
+2. **FALLBACK 1 — MCP Tools** — Only if Python script is not found
+3. **FALLBACK 2 — matplotlib/seaborn** — If PaperBanana is not installed at all
 
-**Workflow:**
-1. Write the source context to a temporary .txt file (the methodology description,
-   framework explanation, or process narrative)
-2. Call the MCP tool with the file path and a caption
-3. Save the resulting PNG to `figures/`
-4. Return LaTeX snippet:
-   ```latex
-   \begin{figure}[htbp]
-   \centering
-   \includegraphics[width=\linewidth]{figures/filename.png}
-   \caption{Your caption here}
-   \label{fig:label}
-   \end{figure}
-   ```
+---
 
-**Fallback (no MCP):** Use Python with matplotlib + networkx or graphviz to generate
-the diagram programmatically.
+## Method 1: Direct Python API (PRIMARY — Always Use This)
 
-### Diagram Prompting Guide
+The plugin ships a helper script `scripts/paperbanana_direct.py` that calls the
+PaperBanana Python API directly via `asyncio.run()`, completely bypassing the
+MCP stdio transport. It outputs JSON to stdout.
 
-Good source context for PaperBanana includes:
-- **What the diagram shows**: "This figure illustrates the three-phase research design"
-- **Key components**: "Phase 1: Literature Search, Phase 2: Screening, Phase 3: Analysis"
-- **Relationships**: "Phase 1 feeds into Phase 2, which filters down to Phase 3"
-- **Style hints**: "PRISMA-style flow diagram" or "layered architecture diagram"
+### Locating the Script
 
-Example:
-```
-Source: "The research follows a systematic literature review methodology with three
-stages: (1) database search across Scopus, Web of Science, IEEE Xplore, and AIS
-eLibrary using predefined search strings, (2) two-stage screening with title/abstract
-review followed by full-text assessment against inclusion/exclusion criteria, and
-(3) thematic synthesis using a concept matrix approach."
+The script is at `scripts/paperbanana_direct.py` inside the plugin directory.
+To find it reliably across any installation:
 
-Caption: "Systematic Literature Review Process"
+```bash
+PB_SCRIPT="$(find ~/.claude/plugins -name paperbanana_direct.py -path '*/open-academic-paper-machine/*' 2>/dev/null | head -1)"
 ```
 
+### Generate Diagram
+
+For **short** source contexts (< 1000 chars), pass inline:
+
+```bash
+PB_SCRIPT="$(find ~/.claude/plugins -name paperbanana_direct.py -path '*/open-academic-paper-machine/*' 2>/dev/null | head -1)" && \
+python3 "$PB_SCRIPT" diagram \
+  --source-context "The research follows a three-stage SLR methodology..." \
+  --caption "Figure 1: Systematic Literature Review Process" \
+  --output-dir figures/ \
+  --filename "fig_method_slr_process.png" \
+  --iterations 3
+```
+
+For **long** source contexts, write to a temp file first to avoid shell escaping issues:
+
+```bash
+# Step 1: Write source context to temp file
+cat > /tmp/pb_source_context.txt <<'CTXEOF'
+[FULL METHODOLOGY TEXT / FRAMEWORK DESCRIPTION HERE — can be multiple paragraphs,
+include all relevant details about components, relationships, and visual structure]
+CTXEOF
+
+# Step 2: Generate the figure
+PB_SCRIPT="$(find ~/.claude/plugins -name paperbanana_direct.py -path '*/open-academic-paper-machine/*' 2>/dev/null | head -1)" && \
+python3 "$PB_SCRIPT" diagram \
+  --source-context "$(cat /tmp/pb_source_context.txt)" \
+  --caption "Figure N: Descriptive Caption" \
+  --output-dir figures/ \
+  --filename "fig_section_description.png" \
+  --iterations 3
+```
+
+### Generate Plot
+
+```bash
+PB_SCRIPT="$(find ~/.claude/plugins -name paperbanana_direct.py -path '*/open-academic-paper-machine/*' 2>/dev/null | head -1)" && \
+python3 "$PB_SCRIPT" plot \
+  --data '{"categories": ["2020","2021","2022","2023","2024"], "values": [12,25,48,89,156]}' \
+  --caption "Bar chart showing exponential growth in AI adoption across financial services" \
+  --output-dir figures/ \
+  --filename "fig_results_adoption_growth.png" \
+  --iterations 3
+```
+
+### Evaluate Diagram
+
+```bash
+PB_SCRIPT="$(find ~/.claude/plugins -name paperbanana_direct.py -path '*/open-academic-paper-machine/*' 2>/dev/null | head -1)" && \
+python3 "$PB_SCRIPT" evaluate \
+  --generated figures/fig_generated.png \
+  --reference figures/fig_reference.png \
+  --context "Original methodology text" \
+  --caption "Figure caption"
+```
+
+### Reading the Output
+
+The script prints JSON to stdout:
+- Success: `{"status":"ok","image_path":"figures/fig_name.png","iterations":3,"metadata":{...}}`
+- Error: `{"status":"error","message":"..."}`
+
+On success, show the figure to the user using the Read tool on the PNG path.
+
+### Timeout
+
+PaperBanana generation takes 30-180 seconds (3 refinement iterations). Set a
+generous Bash timeout of **300 seconds** (5 minutes) when calling the script.
+
 ---
 
-## Tool 2: Generate Plot
+## Method 2: MCP Tools (FALLBACK — Only if Script Not Found)
 
-**Use for:** Bar charts, line charts, scatter plots, heatmaps, box plots,
-distribution plots — any statistical visualization from data.
+If `paperbanana_direct.py` cannot be located, try the MCP tools as fallback:
 
-**MCP Tool:** `paperbanana_generate_plot` (if paperbanana MCP is connected)
+- `paperbanana_generate_diagram(source_context, caption, iterations)`
+- `paperbanana_generate_plot(data_json, intent, iterations)`
+- `paperbanana_evaluate_diagram(generated_path, reference_path, context, caption)`
 
-**Workflow:**
-1. Prepare data as CSV or JSON file
-2. Call the MCP tool with the data file path and an intent description
-3. Save the resulting PNG to `figures/`
-4. Return LaTeX snippet
+**Warning:** These go through stdio transport which may time out or fail silently.
+If an MCP call hangs or returns an error, do NOT retry via MCP — switch to Method 3.
 
-**Intent examples:**
-- "Bar chart comparing adoption rates across industries"
-- "Timeline showing publication counts by year"
-- "Heatmap of technology capability vs. organizational maturity"
-- "Stacked bar chart of implementation challenges by category"
+---
 
-**Fallback (no MCP):** Use Python with matplotlib/seaborn:
+## Method 3: Python matplotlib/seaborn (LAST RESORT)
+
+If PaperBanana is not installed at all, generate figures with Python directly:
+
 ```python
 import matplotlib.pyplot as plt
 import matplotlib
 matplotlib.use('Agg')
 import seaborn as sns
 
-# Set academic style
 plt.style.use('seaborn-v0_8-whitegrid')
 plt.rcParams.update({
     'font.family': 'serif',
@@ -140,18 +179,38 @@ plt.rcParams.update({
 })
 ```
 
+For methodology diagrams without PaperBanana, use networkx or graphviz:
+```python
+import networkx as nx
+# Build a directed graph and render with matplotlib
+```
+
 ---
 
-## Tool 3: Evaluate Diagram
+## When the User Says "Make Me a Figure" — What to Do
 
-**Use for:** Quality checking a generated figure against a reference or expected output.
+1. **Determine figure type**: diagram (methodology, framework, process) or plot (bar, line, scatter, etc.)
+2. **Gather input**: text description for diagrams, data file for plots
+3. **Generate using Direct Python API** (Method 1) — ALWAYS try this first
+4. **If Method 1 fails**: try MCP tools (Method 2), then matplotlib (Method 3)
+5. **Save to figures/ directory** in the working folder
+6. **Provide LaTeX include snippet** ready for copy-paste
+7. **Show the generated figure** to the user using Read tool on the PNG
 
-**MCP Tool:** `paperbanana_evaluate_diagram` (if paperbanana MCP is connected)
+---
 
-**Workflow:**
-1. Provide the generated image path and a reference image path
-2. The tool returns a quality score and improvement suggestions
-3. If score is low, re-generate with refined input
+## Diagram Prompting Guide
+
+Good source context for PaperBanana includes:
+- **What the diagram shows**: "This figure illustrates the three-phase research design"
+- **Key components**: "Phase 1: Literature Search, Phase 2: Screening, Phase 3: Analysis"
+- **Relationships**: "Phase 1 feeds into Phase 2, which filters down to Phase 3"
+- **Style hints**: "PRISMA-style flow diagram" or "layered architecture diagram"
+- **Layout direction**: "left-to-right flow" or "top-to-bottom hierarchy"
+
+The **communicative_intent** (caption) should describe WHAT the figure communicates,
+not just what it contains. Good: "Three-pillar model showing how education, process
+redesign, and encoded judgment sequentially build sovereign AI mastery." Bad: "Figure 1."
 
 ---
 
