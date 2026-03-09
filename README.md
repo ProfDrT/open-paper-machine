@@ -511,7 +511,11 @@ Plus **Research Data Management** guidance: FAIR principles, data management pla
 
 Many journals and conferences now require disclosure of AI tool usage in research ([ACM Policy](https://www.acm.org/publications/policies/new-acm-policy-on-authorship), [Springer Nature Policy](https://www.nature.com/nature-portfolio/editorial-policies/ai), [Elsevier Policy](https://www.elsevier.com/about/policies-and-standards/the-use-of-generative-ai-and-ai-assisted-technologies-in-writing)). Below is a **template disclaimer** you can adapt for papers produced with or assisted by this tool.
 
-### Template (copy and adapt)
+### Short Version (permissive venues)
+
+> **Use of AI tools.** The authors used the *Open Academic Paper Machine* (Blask, 2026) for [literature search / text drafting / figure generation / LaTeX conversion / citation verification]. All output was reviewed and revised by the authors, who take full responsibility for the final content.
+
+### Full Version (strict venues: ACM, Nature, Elsevier)
 
 > **Use of AI-assisted tools.** This paper was produced with the assistance of the *Open Academic Paper Machine* (Blask, 2026), a Claude Code plugin that automates academic paper production workflows. Specifically, AI was used for: [**select applicable**] (1) systematic literature search and deduplication across academic databases; (2) drafting initial text for [specific sections, e.g., "the Related Work section"]; (3) generation of publication-quality figures using PaperBanana (Zhu et al., 2026); (4) conversion to LaTeX and bibliography management; (5) citation verification against source abstracts. All AI-generated content was reviewed, validated, and revised by the author(s). The author(s) take full responsibility for the final content, including the accuracy of all claims, citations, and conclusions. The tool and its documentation are openly available at https://github.com/TobiasBlask/open-paper-machine.
 
