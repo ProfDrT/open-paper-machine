@@ -59,6 +59,19 @@ Phase 8 closes the loop: send an annotated PDF from your co-author or paste revi
 
 ---
 
+## Requirements
+
+| Requirement | Version | Notes |
+|---|---|---|
+| [Claude Code](https://docs.anthropic.com/en/docs/claude-code) | Latest | CLI or IDE extension (VS Code / JetBrains) |
+| Python | 3.10+ | For PaperBanana and academic-search MCP servers |
+| LaTeX | Any recent | Optional — only needed for PDF compilation (`/export-latex`) |
+| Google API key | Free | For AI figure generation — [get one here](https://aistudio.google.com/apikey) |
+
+> **No Google API key?** The plugin works fully without one — you just won't get AI-generated figures. The figure-engine falls back to matplotlib/seaborn. All other features (literature search, writing, LaTeX, revision, etc.) work independently.
+
+---
+
 ## Installation
 
 ### What Gets Installed
@@ -121,8 +134,8 @@ sudo apt-get install texlive-full
 
 ### Cowork Setup
 
-1. Download this repo as ZIP
-2. Upload via Plugins panel ("+" button)
+1. Download the latest release ZIP from [GitHub Releases](https://github.com/TobiasBlask/open-paper-machine/releases)
+2. In Cowork, open the Plugins panel and click "+" → upload the ZIP
 3. Set `GOOGLE_API_KEY` in plugin settings (optional — only needed for AI figures)
 4. `/write-paper Your Paper Title`
 
@@ -160,7 +173,6 @@ sudo apt-get install texlive-full
 | `/prepare-submission [venue]` | Venue-specific submission package: anonymization, cover letter, reviewer suggestions |
 | `/monitor-literature` | Re-run search queries, find papers published since last search |
 | `/generate-slides [format]` | Conference presentation slides with speaker notes (Marp-compatible) |
-| `/analyze-interviews [transcripts]` | Qualitative interview analysis — thematic coding, cross-case analysis, evidence tables |
 
 ---
 
@@ -197,7 +209,6 @@ The plugin contains 15 specialized skill engines (~5,800 lines of domain knowled
 | **positioning-engine** | Competitive positioning | Differentiation matrix, unique positioning analysis, draft positioning paragraph |
 | **submission-engine** | Submission preparation | Anonymization checks, cover letter generation, reviewer suggestions, venue formatting validation |
 | **presentation-engine** | Slide generation | Conference slides with speaker notes from paper, Marp-compatible output |
-| **qualitative-engine** | Qualitative analysis | Interview transcript analysis, thematic coding, cross-case analysis, evidence tables |
 | **coauthor-engine** | Author management | CRediT contribution tracking, human-AI division of labor documentation |
 
 ### MCP Servers (Bundled)
@@ -311,8 +322,7 @@ After `/write-paper` + `/export-latex`, your project directory contains:
 │   ├── prepare-submission.md   # /prepare-submission
 │   ├── generate-figure.md      # /generate-figure
 │   ├── generate-plot.md        # /generate-plot
-│   ├── generate-slides.md      # /generate-slides
-│   └── analyze-interviews.md   # /analyze-interviews
+│   └── generate-slides.md      # /generate-slides
 ├── skills/                      # 15 domain-specific engines (~5,800 lines)
 │   ├── literature-engine/      # Systematic literature search + monitoring
 │   ├── theory-engine/          # Theoretical framing
@@ -328,7 +338,6 @@ After `/write-paper` + `/export-latex`, your project directory contains:
 │   ├── positioning-engine/     # Competitive positioning analysis
 │   ├── submission-engine/      # Venue-specific submission preparation
 │   ├── presentation-engine/    # Conference slide generation
-│   ├── qualitative-engine/     # Interview analysis + thematic coding
 │   └── coauthor-engine/        # CRediT author contribution tracking
 ├── scientific-skills/              # 24 curated skills from K-Dense AI (v6.1.0)
 │   ├── hypothesis-generation/     # Structured hypothesis formulation
@@ -480,6 +489,21 @@ The method-engine (797 lines) provides complete section templates for 13 methodo
 - **Simulation** — Agent-based modeling, discrete event simulation
 
 Plus **Research Data Management** guidance: FAIR principles, data management plans (DMP), data availability statements.
+
+---
+
+## Troubleshooting
+
+| Problem | Solution |
+|---------|----------|
+| `paperbanana: command not found` | Run `pip install paperbanana[mcp,google]` |
+| `academic-search-mcp: command not found` | Run `pip install academic-search-mcp` |
+| `GOOGLE_API_KEY not set` | Create `~/.paperbanana.env` with your key (see [Installation](#step-by-step)) |
+| `API key expired / 400 error` | Get a new key at [Google AI Studio](https://aistudio.google.com/apikey) and update `~/.paperbanana.env` |
+| PaperBanana figure generation times out | This is the MCP transport issue fixed in v6.2.0. Update to v6.2.0 — the direct Python API bypasses MCP automatically |
+| `/write-paper` not recognized | Plugin not loaded. Run `/plugin install open-academic-paper-machine@open-paper-machine` |
+| LaTeX compilation fails | Install LaTeX: `brew install --cask mactex-no-gui` (macOS) or `apt install texlive-full` (Linux) |
+| `No module named 'paperbanana'` | Ensure you installed with extras: `pip install paperbanana[mcp,google]` (not just `pip install paperbanana`) |
 
 ---
 
