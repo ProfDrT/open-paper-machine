@@ -19,8 +19,7 @@ Read the figure-engine skill first.
      --filename "fig_results_name.png" \
      --iterations 3
    ```
-4. If the script is not found, **FALLBACK**: call PaperBanana MCP `paperbanana_generate_plot`
-5. If MCP also fails, **LAST RESORT**: generate using Python (matplotlib/seaborn) with academic styling
+4. If the script is not found, **FALLBACK**: generate using Python (matplotlib/seaborn) with academic styling
 6. Save output PNG to `figures/` in the workspace (300 DPI, tight layout)
 7. Provide the LaTeX `\begin{figure}` snippet ready for inclusion
 8. Show the user the generated figure using the Read tool on the PNG path

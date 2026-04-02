@@ -3,9 +3,8 @@ name: figure-engine
 description: >
   Activate when the user needs to generate, refine, or evaluate academic figures,
   diagrams, or statistical plots. Uses PaperBanana to transform text descriptions
-  or data files into publication-quality illustrations. Primary method: direct
-  Python API call (bypasses unreliable MCP transport). Fallback: MCP tools or
-  matplotlib/seaborn.
+  or data files into publication-quality illustrations via direct Python API call.
+  Fallback: matplotlib/seaborn.
 ---
 
 > **Orchestration Log**: When this skill is activated, append a log entry to `outputs/orchestration_log.md`:
@@ -44,16 +43,14 @@ Get a free key at https://aistudio.google.com/apikey
 
 ---
 
-## CRITICAL: Method Priority — Direct Python API First
-
-> **The MCP transport layer (stdio) for PaperBanana is unreliable.** It frequently
-> times out, hangs, or fails silently. The direct Python API works perfectly and
-> is 100% reliable. **ALWAYS use Method 1 (Direct Python API) first.**
+## Method Priority
 
 ### Priority Order:
-1. **PRIMARY — Direct Python API** (via Bash → python3) — ALWAYS try this first
-2. **FALLBACK 1 — MCP Tools** — Only if Python script is not found
-3. **FALLBACK 2 — matplotlib/seaborn** — If PaperBanana is not installed at all
+1. **PRIMARY — Direct Python API** (via Bash → python3) — ALWAYS use this
+2. **FALLBACK — matplotlib/seaborn** — If PaperBanana is not installed at all
+
+> **Note:** The PaperBanana MCP server is NOT used. The MCP stdio transport is
+> unreliable (timeouts, hangs, silent failures). Always use the direct Python API.
 
 ---
 
@@ -143,20 +140,7 @@ generous Bash timeout of **300 seconds** (5 minutes) when calling the script.
 
 ---
 
-## Method 2: MCP Tools (FALLBACK — Only if Script Not Found)
-
-If `paperbanana_direct.py` cannot be located, try the MCP tools as fallback:
-
-- `paperbanana_generate_diagram(source_context, caption, iterations)`
-- `paperbanana_generate_plot(data_json, intent, iterations)`
-- `paperbanana_evaluate_diagram(generated_path, reference_path, context, caption)`
-
-**Warning:** These go through stdio transport which may time out or fail silently.
-If an MCP call hangs or returns an error, do NOT retry via MCP — switch to Method 3.
-
----
-
-## Method 3: Python matplotlib/seaborn (LAST RESORT)
+## Method 2: Python matplotlib/seaborn (FALLBACK)
 
 If PaperBanana is not installed at all, generate figures with Python directly:
 
@@ -191,8 +175,8 @@ import networkx as nx
 
 1. **Determine figure type**: diagram (methodology, framework, process) or plot (bar, line, scatter, etc.)
 2. **Gather input**: text description for diagrams, data file for plots
-3. **Generate using Direct Python API** (Method 1) — ALWAYS try this first
-4. **If Method 1 fails**: try MCP tools (Method 2), then matplotlib (Method 3)
+3. **Generate using Direct Python API** (Method 1) — ALWAYS use this
+4. **If Method 1 fails**: fall back to matplotlib/seaborn (Method 2)
 5. **Save to figures/ directory** in the working folder
 6. **Provide LaTeX include snippet** ready for copy-paste
 7. **Show the generated figure** to the user using Read tool on the PNG

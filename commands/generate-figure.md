@@ -20,8 +20,7 @@ Read the figure-engine skill first.
      --filename "fig_section_name.png" \
      --iterations 3
    ```
-5. If the script is not found, **FALLBACK**: call PaperBanana MCP `paperbanana_generate_diagram`
-6. If MCP also fails, **LAST RESORT**: generate using Python (matplotlib + graphviz/networkx)
+5. If the script is not found, **FALLBACK**: generate using Python (matplotlib + graphviz/networkx)
 7. Save output PNG to `figures/` in the workspace
 8. Provide the LaTeX `\begin{figure}` snippet ready for inclusion
 9. Show the user the generated figure using the Read tool on the PNG path

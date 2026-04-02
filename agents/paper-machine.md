@@ -382,7 +382,7 @@ Concept matrix: [N] papers × [N] concepts — [key insight about distribution]
 #### Actions:
 Write EVERY section following the writing-engine templates.
 For sections that need visual support (methodology, results, discussion), use the
-**figure-engine** skill to generate diagrams and plots via PaperBanana MCP or Python fallback.
+**figure-engine** skill to generate diagrams and plots via PaperBanana direct Python API or matplotlib/seaborn fallback.
 Save all figures to `figures/` and reference with `\ref{fig:label}` in the text.
 
 **4a. Introduction** (writing-engine: 6-paragraph formula)

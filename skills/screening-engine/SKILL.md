@@ -285,7 +285,7 @@ Generate both a text-based PRISMA diagram and a visual diagram via figure-engine
 
 #### Visual PRISMA Diagram:
 
-Generate via figure-engine / PaperBanana MCP:
+Generate via figure-engine / PaperBanana direct Python API:
 
 ```
 Use the generate_diagram tool with:

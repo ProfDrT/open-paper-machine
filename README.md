@@ -16,7 +16,7 @@
 /plugin install open-academic-paper-machine@open-paper-machine
 
 # 2. Install dependencies
-pip install paperbanana[mcp,google] academic-search-mcp
+pip install paperbanana[google] academic-search-mcp
 
 # 3. Set up your API key (free — https://aistudio.google.com/apikey)
 echo 'GOOGLE_API_KEY="your-key"' > ~/.paperbanana.env
@@ -26,7 +26,7 @@ echo 'GOOGLE_API_KEY="your-key"' > ~/.paperbanana.env
 /write-paper The impact of generative AI on organizational decision-making
 ```
 
-That's it. The plugin ships both MCP servers (`academic-search` and `paperbanana`), the direct PaperBanana Python API for reliable figure generation, all 16 skill engines, 4 agents, 24 curated scientific skills, 17 slash commands, and the autonomous pipeline agent. Everything starts automatically.
+That's it. The plugin ships the `academic-search` MCP server, the PaperBanana direct Python API for figure generation, all 16 skill engines, 4 agents, 24 curated scientific skills, 17 slash commands, and the autonomous pipeline agent. Everything starts automatically.
 
 **Technical paper:** [The Open Academic Paper Machine: An Autonomous LLM Plugin for End-to-End Academic Paper Production](paper/paper.pdf) (Blask, 2026) — describes the system architecture, design principles, and evaluation. LaTeX source in [`paper/`](paper/).
 
@@ -77,14 +77,14 @@ Phase 8 closes the loop: send an annotated PDF from your co-author or paste revi
 
 ### What Gets Installed
 
-The plugin bundles two MCP servers that start automatically:
+The plugin bundles one MCP server that starts automatically, plus PaperBanana via direct Python API:
 
-| MCP Server | pip package | What it does |
+| Component | pip package | What it does |
 |---|---|---|
-| `academic-search` | [`academic-search-mcp`](https://pypi.org/project/academic-search-mcp/) | Searches Semantic Scholar, OpenAlex, CrossRef, arXiv. Snowballing, BibTeX/CSV export. |
-| `paperbanana` | [`paperbanana`](https://pypi.org/project/paperbanana/) | AI figure generation via Google Gemini. Multi-agent pipeline with iterative refinement. Based on [Zhu et al. (2026)](https://arxiv.org/abs/2601.23265). |
+| `academic-search` (MCP) | [`academic-search-mcp`](https://pypi.org/project/academic-search-mcp/) | Searches Semantic Scholar, OpenAlex, CrossRef, arXiv. Snowballing, BibTeX/CSV export. |
+| PaperBanana (direct API) | [`paperbanana`](https://pypi.org/project/paperbanana/) | AI figure generation via Google Gemini. Multi-agent pipeline with iterative refinement. Based on [Zhu et al. (2026)](https://arxiv.org/abs/2601.23265). |
 
-Both are configured in `plugin.json` and start when Claude Code loads the plugin. No manual MCP setup needed.
+The academic-search MCP server is configured in `plugin.json` and starts when Claude Code loads the plugin. PaperBanana is called via direct Python API (`scripts/paperbanana_direct.py`) — the MCP transport layer was removed in v6.3.0 due to persistent reliability issues (timeouts, silent failures).
 
 > **Academic foundation:** The figure generation pipeline implements the methodology from [PaperBanana: Automating Academic Illustration for AI Scientists](https://arxiv.org/abs/2601.23265) (Zhu et al., 2026). The MCP integration uses the community implementation at [`llmsresearch/paperbanana`](https://github.com/llmsresearch/paperbanana). See also the [official research repo](https://github.com/dwzhu-pku/PaperBanana).
 
@@ -100,7 +100,7 @@ Both are configured in `plugin.json` and start when Claude Code loads the plugin
 **2. Install Python dependencies:**
 
 ```bash
-pip install paperbanana[mcp,google] academic-search-mcp
+pip install paperbanana[google] academic-search-mcp
 ```
 
 **3. Configure your Google API key** (needed for AI figure generation):
@@ -265,7 +265,7 @@ The plugin contains 16 specialized skill engines (~6,500 lines of domain knowled
 | **method-engine** | Research design | 13 method templates (SLR, DSR, case study, Gioia, Mayring, grounded theory, PLS-SEM, mixed, experiment/RCT, action research, ethnography, Delphi, simulation) + research data management |
 | **writing-engine** | Paragraph-level text production | Section templates, sentence formulas, academic register for IS/WI/BWL, style analysis (8 metrics) |
 | **qualitative-engine** | Qualitative data analysis | Summary-first transcript processing, thematic coding (Gioia/Mayring/Braun & Clarke), cross-case analysis, evidence tables |
-| **figure-engine** | Visual production | PaperBanana AI diagrams (Gemini) via direct Python API (primary) with MCP and matplotlib/seaborn fallback |
+| **figure-engine** | Visual production | PaperBanana AI diagrams (Gemini) via direct Python API, matplotlib/seaborn fallback |
 | **latex-engine** | Document compilation | arxiv-style conversion, `\citep`/`\citet` citation resolution, PDF build |
 | **verification-engine** | Citation verification | Source retrieval (abstract + full-text), claim-source comparison, verification report |
 | **review-engine** | Revision automation | PDF annotation extraction, comment classification, change planning, latexdiff generation |
@@ -287,12 +287,12 @@ The plugin contains 16 specialized skill engines (~6,500 lines of domain knowled
   <img src="paper/figures/fig3_mcp_integration.png" alt="MCP Integration" width="700">
 </p>
 
-Both servers are declared in `plugin.json` and start automatically with the plugin:
+The `academic-search` MCP server is declared in `plugin.json` and starts automatically. PaperBanana is called via direct Python API (not MCP):
 
-| Server | Package | APIs | Purpose |
-|--------|---------|------|---------|
-| `academic-search` | `academic-search-mcp` | Semantic Scholar, OpenAlex, CrossRef, arXiv | Literature search, snowballing, multi-query, BibTeX/CSV export |
-| `paperbanana` | `paperbanana[mcp,google]` | Google Gemini | AI diagram generation, statistical plots, diagram evaluation |
+| Component | Package | APIs | Purpose |
+|-----------|---------|------|---------|
+| `academic-search` (MCP) | `academic-search-mcp` | Semantic Scholar, OpenAlex, CrossRef, arXiv | Literature search, snowballing, multi-query, BibTeX/CSV export |
+| PaperBanana (direct API) | `paperbanana[google]` | Google Gemini | AI diagram generation, statistical plots, diagram evaluation |
 
 ### Pipeline Agent
 
@@ -466,9 +466,9 @@ The 5-agent, 2-phase architecture uses in-context learning with curated referenc
 
 ### Direct Python API (v6.2.0)
 
-Since v6.2.0, the figure-engine calls PaperBanana's Python API directly via `asyncio.run()`, bypassing the MCP stdio transport layer. This eliminates the reliability issues (timeouts, silent failures) that affected the MCP transport in long-running generation pipelines (~35–45 seconds per figure).
+Since v6.2.0, the figure-engine calls PaperBanana's Python API directly via `asyncio.run()`. Since v6.3.0, the MCP transport has been removed entirely — it was unreliable (timeouts, silent failures in long-running generation pipelines of ~35-45 seconds per figure).
 
-**Reliability chain:** Direct Python API (primary) → MCP tools (fallback) → matplotlib/seaborn (last resort).
+**Reliability chain:** Direct Python API → matplotlib/seaborn (fallback).
 
 The wrapper script `scripts/paperbanana_direct.py` supports all PaperBanana features:
 
@@ -587,7 +587,7 @@ Plus **Research Data Management** guidance: FAIR principles, data management pla
 | `academic-search-mcp: command not found` | Run `pip install academic-search-mcp` |
 | `GOOGLE_API_KEY not set` | Create `~/.paperbanana.env` with your key (see [Installation](#step-by-step)) |
 | `API key expired / 400 error` | Get a new key at [Google AI Studio](https://aistudio.google.com/apikey) and update `~/.paperbanana.env` |
-| PaperBanana figure generation times out | This is the MCP transport issue fixed in v6.2.0. Update to v6.2.0 — the direct Python API bypasses MCP automatically |
+| PaperBanana figure generation times out | Ensure you're on v6.3.0+ — the unreliable MCP transport has been removed. Figures are now generated via direct Python API only |
 | `/write-paper` not recognized | Plugin not loaded. Run `/plugin install open-academic-paper-machine@open-paper-machine` |
 | LaTeX compilation fails | Install LaTeX: `brew install --cask mactex-no-gui` (macOS) or `apt install texlive-full` (Linux) |
 | `No module named 'paperbanana'` | Ensure you installed with extras: `pip install paperbanana[mcp,google]` (not just `pip install paperbanana`) |

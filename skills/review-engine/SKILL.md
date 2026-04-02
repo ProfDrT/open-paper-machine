@@ -352,7 +352,7 @@ After the user approves the plan, execute changes in dependency order.
 
 7. **Figure changes** (`FIGURE`)
    - Invoke figure-engine skill
-   - Use PaperBanana MCP `generate_diagram` or `generate_plot`
+   - Use PaperBanana direct Python API via `paperbanana_direct.py`
    - Copy generated figure to `latex/figures/`
    - Update `\includegraphics` path if needed
 
