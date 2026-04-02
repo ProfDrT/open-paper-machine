@@ -3,7 +3,7 @@
 > A Claude Code plugin that autonomously writes academic papers — from literature search to production-ready LaTeX/PDF.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Plugin Version](https://img.shields.io/badge/plugin-v6.2.0-green)]()
+[![Plugin Version](https://img.shields.io/badge/plugin-v6.3.0-green)]()
 [![Template](https://img.shields.io/badge/template-arxiv--style-orange)](https://github.com/kourgeorge/arxiv-style)
 
 > **Scope note.** This project is a *technical* contribution: it explores what is *possible* with current LLM technology for academic paper production, not what is desirable or ethically permissible. The ethical, epistemological, and policy questions raised by AI-generated academic writing — authorship attribution, academic integrity, epistemic status, potential misuse — are important but outside the scope of this tool. They are addressed in the companion position paper ([Blask & Funk, 2026](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=6358578)).
@@ -26,7 +26,7 @@ echo 'GOOGLE_API_KEY="your-key"' > ~/.paperbanana.env
 /write-paper The impact of generative AI on organizational decision-making
 ```
 
-That's it. The plugin ships both MCP servers (`academic-search` and `paperbanana`), the direct PaperBanana Python API for reliable figure generation, all 15 skill engines, 24 curated scientific skills, 16 slash commands, and the autonomous pipeline agent. Everything starts automatically.
+That's it. The plugin ships both MCP servers (`academic-search` and `paperbanana`), the direct PaperBanana Python API for reliable figure generation, all 16 skill engines, 4 agents, 24 curated scientific skills, 17 slash commands, and the autonomous pipeline agent. Everything starts automatically.
 
 **Technical paper:** [The Open Academic Paper Machine: An Autonomous LLM Plugin for End-to-End Academic Paper Production](paper/paper.pdf) (Blask, 2026) — describes the system architecture, design principles, and evaluation. LaTeX source in [`paper/`](paper/).
 
@@ -40,10 +40,11 @@ That's it. The plugin ships both MCP servers (`academic-search` and `paperbanana
   <img src="paper/figures/fig2_pipeline_flow.png" alt="Pipeline Flow" width="700">
 </p>
 
-The machine runs autonomously through **8 phases**:
+The machine runs autonomously through **9 phases**:
 
 | Phase | What Happens | Your Job |
 |-------|-------------|----------|
+| **0. Idea Evaluation** *(v6.3.0)* | Stress-test idea along 7 dimensions, conclusion-first test, PURSUE/REFINE/KILL verdict | Decide whether to proceed |
 | **1. Reconnaissance** | 4-6 search queries across 4 academic APIs, snowballing, deduplication | Check scope, redirect if needed |
 | **2. Framing** | Theory selection, gap formulation, research questions, contribution statement | Confirm direction |
 | **3. Structure** | Concept matrix, paper structure, word budget | Approve structure |
@@ -53,7 +54,7 @@ The machine runs autonomously through **8 phases**:
 | **7. Verification** *(opt.)* | Fetch source abstracts/PDFs, verify each citation claim | Review flagged mismatches |
 | **8. Revision** *(repeatable)* | Extract reviewer/co-author feedback, classify, implement changes, recompile + latexdiff | Approve change plan |
 
-**Core principle:** The machine makes decisions and presents results. You steer at checkpoints.
+**Core principle:** Before producing, evaluate. The machine gates the pipeline — not every topic deserves months of work. Then it makes decisions and presents results. You steer at checkpoints.
 
 Phase 8 closes the loop: send an annotated PDF from your co-author or paste reviewer comments, and the review-engine extracts, classifies, and implements all changes — then recompiles and generates a visual diff. The cycle repeats (Round 1 → 2 → 3 → ...) until acceptance.
 
@@ -141,13 +142,76 @@ sudo apt-get install texlive-full
 
 ---
 
+## Idea Evaluation — Phase 0 (v6.3.0)
+
+Most AI writing tools help you *write* papers. Phase 0 helps you decide *which* papers to write.
+
+The previous pipeline took any topic and produced. Version 6.3.0 adds the missing gate: **Is this paper the right use of my time?** Based on Nicholas Carlini's research philosophy ([How to Win a Best Paper Award](https://nicholas.carlini.com/writing/2026/how-to-win-a-best-paper-award.html)) and the [research-companion](https://github.com/andrehuang/research-companion) plugin by Andre Huang.
+
+```bash
+# Standalone idea evaluation
+/evaluate-idea Can LLMs replace systematic literature reviews?
+
+# Or just run /write-paper — Phase 0 runs automatically first
+/write-paper The impact of generative AI on organizational decision-making
+```
+
+### How It Works
+
+Three specialist agents evaluate your idea before the pipeline commits to production:
+
+| Agent | Role | Output |
+|-------|------|--------|
+| **Idea Critic** | Adversarial stress-test along 7 dimensions | PURSUE / REFINE / KILL verdict |
+| **Research Strategist** | Strategic viability: competition, timing, comparative advantage | Green / Yellow / Red flags |
+| **Brainstormer** | Cross-field connections, assumption challenges, reframings | Alternative angles and extensions |
+
+### The 7 Evaluation Dimensions
+
+| Dimension | Key Question | Signal |
+|-----------|-------------|--------|
+| **Novelty** (RS1) | If you don't do this, how long until someone else does? | Weeks / Months / Years |
+| **Impact** (RS2) | Can you write a compelling conclusion right now? | Low / Medium / High |
+| **Timing** (RS8) | Is the field ready? Too early? Already crowded? | Too Early / Well-Timed / Too Late |
+| **Feasibility** (RS4) | What's the riskiest assumption? Can you test it in a week? | High / Medium / Low Risk |
+| **Competition** (RS7) | Who else is working on this? What's your advantage? | Crowded / Moderate / Open |
+| **Nugget** (RS3) | Can you state the key insight in one sentence? | Clear / Fuzzy / Missing |
+| **Narrative** | Can you tell a story that makes a skeptical reader care? | Compelling / Workable / Weak |
+
+### The Conclusion-First Test
+
+The decisive gate. Before investing, the engine writes the best-case conclusion: if everything works perfectly, what can this paper say? If the answer is hollow or generic — if it only says "our method achieves X% improvement" — the idea doesn't have enough impact. Kill it and move on.
+
+### Research Strategy Principles (RS1-RS8)
+
+Eight principles guide evaluation (see `principles/research-strategy.md`):
+
+- **RS1 (Novelty Test):** Favor problems where your unique skills create a months-to-years gap.
+- **RS2 (Conclusion-First Test):** Write the conclusion before doing the research.
+- **RS3 (Nugget Test):** One sentence. One idea. Every figure connects to it.
+- **RS4 (Fail Fast):** Start with what's most likely to kill the project.
+- **RS5 (Kill Early):** A working project with low impact is worse than a killed project.
+- **RS6 (Unreasonable Effort):** Go to unreasonable lengths — but only AFTER RS4 and RS5.
+- **RS7 (Comparative Advantage):** Research space is high-dimensional; find your unique corner.
+- **RS8 (Timing Awareness):** Impact = skill x domain importance at this moment.
+
+Evaluations persist to `research-evaluations/*.md` for cross-session continuity. Previously killed ideas are checked for changed conditions rather than re-evaluated from scratch.
+
+---
+
 ## Commands
+
+### Idea Evaluation (v6.3.0)
+
+| Command | Description |
+|---------|-------------|
+| `/evaluate-idea [topic]` | **Standalone idea stress-test** — 7 dimensions, 3 agents, conclusion-first test, PURSUE/PARK/KILL verdict |
 
 ### Core Pipeline
 
 | Command | Description |
 |---------|-------------|
-| `/write-paper [title]` | **Full pipeline** — all 8 phases, start to finish |
+| `/write-paper [title]` | **Full pipeline** — Phase 0 (evaluation) + Phases 1-8, start to finish |
 | `/search-papers [topic]` | Phase 1: systematic literature search across 4 APIs |
 | `/draft-section [section]` | Phase 4: write one specific section as complete paragraphs |
 | `/export-latex` | Phase 6: convert finished draft to arxiv-style LaTeX + compiled PDF |
@@ -184,7 +248,13 @@ sudo apt-get install texlive-full
 
 ### Skill Engines
 
-The plugin contains 15 specialized skill engines (~5,800 lines of domain knowledge) that the paper-machine agent orchestrates, plus 24 curated scientific skills that auto-activate by context:
+The plugin contains 16 specialized skill engines (~6,500 lines of domain knowledge) that the paper-machine agent orchestrates, plus 24 curated scientific skills that auto-activate by context:
+
+#### Idea Evaluation Engine (v6.3.0)
+
+| Engine | Responsibility | Key Capabilities |
+|--------|---------------|-----------------|
+| **idea-engine** | Research idea evaluation | 7-dimension scoring, conclusion-first test, RS1-RS8 principles, PURSUE/REFINE/KILL verdicts, cross-session persistence |
 
 #### Core Pipeline Engines
 
@@ -226,13 +296,23 @@ Both servers are declared in `plugin.json` and start automatically with the plug
 
 ### Pipeline Agent
 
-The `paper-machine` agent (`agents/paper-machine.md`, 720 lines) is an autonomous agent prompt that orchestrates all 15 skill engines through the pipeline phases. Since v6.0.0, the agent proactively suggests extended-capability engines at appropriate stages: screening after Phase 1, positioning after Phase 2, and the full post-production suite (peer review, submission, style analysis, slides) after Phase 6. Operating principles:
+The plugin includes 4 agents:
 
-1. **DO, don't ask.** Make decisions and present results.
-2. **Produce text, not plans.** Every phase yields deliverable output.
-3. **Checkpoint, don't block.** Present work, then continue.
-4. **Be explicit about decisions.** State what was chosen and why.
-5. **Save everything to files.** Every phase produces artifacts.
+| Agent | File | Purpose |
+|-------|------|---------|
+| **paper-machine** | `agents/paper-machine.md` | Autonomous pipeline orchestrator — gates at Phase 0, then orchestrates all 16 skill engines through Phases 1-8 |
+| **idea-critic** | `agents/idea-critic.md` | Adversarial idea stress-test — 7 evaluation dimensions, PURSUE/REFINE/KILL verdicts |
+| **research-strategist** | `agents/research-strategist.md` | Strategic advisor — 5 modes: project triage, comparative advantage, impact forecasting, opportunity cost, scooping risk |
+| **brainstormer** | `agents/brainstormer.md` | Creative idea generator — cross-field connections, assumption challenges, alternative framings |
+
+The paper-machine agent orchestrates all 16 skill engines through the pipeline phases. Since v6.3.0, it evaluates ideas (Phase 0) before committing to production, using the three specialist agents. Operating principles:
+
+1. **Evaluate before producing.** Phase 0 gates the pipeline (v6.3.0).
+2. **DO, don't ask.** Make decisions and present results.
+3. **Produce text, not plans.** Every phase yields deliverable output.
+4. **Checkpoint, don't block.** Present work, then continue.
+5. **Be explicit about decisions.** State what was chosen and why.
+6. **Save everything to files.** Every phase produces artifacts.
 
 ### Scientific Skills Library (v6.1.0)
 
@@ -304,9 +384,13 @@ After `/write-paper` + `/export-latex`, your project directory contains:
 ├── .claude-plugin/
 │   ├── plugin.json             # Plugin manifest + MCP server config
 │   └── marketplace.json        # Marketplace definition for install
-├── agents/
-│   └── paper-machine.md        # Autonomous pipeline agent (706 lines)
-├── commands/                    # 16 slash commands
+├── agents/                      # 4 agents (v6.3.0)
+│   ├── paper-machine.md        # Autonomous pipeline agent (Phase 0-8)
+│   ├── idea-critic.md          # Adversarial idea stress-test (7 dimensions)
+│   ├── research-strategist.md  # Strategic research advisor (5 modes)
+│   └── brainstormer.md         # Creative idea generator (cross-field)
+├── commands/                    # 17 slash commands
+│   ├── evaluate-idea.md        # /evaluate-idea → Phase 0 standalone (v6.3.0)
 │   ├── write-paper.md          # /write-paper  → full pipeline
 │   ├── search-papers.md        # /search-papers → Phase 1
 │   ├── screen-papers.md        # /screen-papers → SLR screening
@@ -323,7 +407,10 @@ After `/write-paper` + `/export-latex`, your project directory contains:
 │   ├── generate-figure.md      # /generate-figure
 │   ├── generate-plot.md        # /generate-plot
 │   └── generate-slides.md      # /generate-slides
-├── skills/                      # 15 domain-specific engines (~5,800 lines)
+├── principles/                  # Research strategy reference (v6.3.0)
+│   └── research-strategy.md    # RS1-RS8 principles (Carlini + research-companion)
+├── skills/                      # 16 domain-specific engines (~6,500 lines)
+│   ├── idea-engine/            # Idea evaluation + Phase 0 orchestration (v6.3.0)
 │   ├── literature-engine/      # Systematic literature search + monitoring
 │   ├── theory-engine/          # Theoretical framing
 │   ├── method-engine/          # 13 research method templates + RDM
@@ -555,6 +642,11 @@ The position paper (orchestrated through human-AI interaction using this system)
   note={Available at \url{https://papers.ssrn.com/sol3/papers.cfm?abstract_id=6358578}}
 }
 ```
+
+The idea evaluation framework (v6.3.0) is inspired by:
+
+- Nicholas Carlini's essay [How to Win a Best Paper Award](https://nicholas.carlini.com/writing/2026/how-to-win-a-best-paper-award.html) (2026) — conclusion-first test, taste for problems, kill conditions, unreasonable effort
+- Andre Huang's [research-companion](https://github.com/andrehuang/research-companion) plugin (MIT License) — 3 agents, 7 evaluation dimensions, RS1-RS8 principles
 
 The figure generation pipeline is based on:
 
