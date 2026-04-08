@@ -3,7 +3,9 @@
 > A Claude Code plugin that autonomously writes academic papers — from literature search to production-ready LaTeX/PDF.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Plugin Version](https://img.shields.io/badge/plugin-v6.3.0-green)]()
+[![Plugin Version](https://img.shields.io/badge/plugin-v6.4.0-green)]()
+
+> **v6.4.0 — Paper-vs-Code Audit.** New `/audit-paper` command and `audit-engine` skill: static audit of a paper's empirical claims (datasets, models, hyperparameters, metrics) against the linked code repository. Classifies each claim as CONFIRMED / PARTIAL / MISSING / MISMATCH / NOT_AUDITABLE with file:line evidence. Complements `/verify-citations` (external sources) by checking own-work claims against own code. Inspired by Feynman's `/audit`.
 [![Template](https://img.shields.io/badge/template-arxiv--style-orange)](https://github.com/kourgeorge/arxiv-style)
 
 > **Scope note.** This project is a *technical* contribution: it explores what is *possible* with current LLM technology for academic paper production, not what is desirable or ethically permissible. The ethical, epistemological, and policy questions raised by AI-generated academic writing — authorship attribution, academic integrity, epistemic status, potential misuse — are important but outside the scope of this tool. They are addressed in the companion position paper ([Blask & Funk, 2026](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=6358578)).
